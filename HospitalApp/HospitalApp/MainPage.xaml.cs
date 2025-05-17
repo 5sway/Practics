@@ -20,7 +20,7 @@ namespace HospitalApp
     /// </summary>
     public partial class MainPage : Page
     {
-        public MainPage()
+        public MainPage(string role)
         {
             InitializeComponent();
         }

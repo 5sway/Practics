@@ -17,3 +17,33 @@ C:\Users\kolya\OneDrive\Рабочий стол\Практика\HospitalApp\Hos
 C:\Users\kolya\OneDrive\Рабочий стол\Практика\HospitalApp\HospitalApp\obj\Debug\HospitalApp.csproj.CoreCompileInputs.cache
 C:\Users\kolya\OneDrive\Рабочий стол\Практика\HospitalApp\HospitalApp\obj\Debug\HospitalApp.exe
 C:\Users\kolya\OneDrive\Рабочий стол\Практика\HospitalApp\HospitalApp\obj\Debug\HospitalApp.pdb
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\HospitalApp.csproj.AssemblyReference.cache
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\AuthorizePage.g.cs
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\MainPage.g.cs
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\MainWindow.g.cs
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\App.g.cs
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\HospitalApp_Content.g.cs
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\HospitalApp_MarkupCompile.cache
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\HospitalApp_MarkupCompile.lref
+D:\Practice\HospitalApp\HospitalApp\bin\Debug\HospitalApp.exe.config
+D:\Practice\HospitalApp\HospitalApp\bin\Debug\HospitalApp.exe
+D:\Practice\HospitalApp\HospitalApp\bin\Debug\HospitalApp.pdb
+D:\Practice\HospitalApp\HospitalApp\bin\Debug\EntityFramework.dll
+D:\Practice\HospitalApp\HospitalApp\bin\Debug\EntityFramework.SqlServer.dll
+D:\Practice\HospitalApp\HospitalApp\bin\Debug\EntityFramework.xml
+D:\Practice\HospitalApp\HospitalApp\bin\Debug\EntityFramework.SqlServer.xml
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\ProfilePage.g.cs
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\AuthorizePage.baml
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\MainPage.baml
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\MainWindow.baml
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\ProfilePage.baml
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\HospitalApp.g.resources
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\HospitalApp.Properties.Resources.resources
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\HospitalApp.csproj.GenerateResource.cache
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\HospitalApp.csproj.CoreCompileInputs.cache
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\Hospital.58D4885F.Up2Date
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\HospitalApp.exe
+D:\Practice\HospitalApp\HospitalApp\obj\Debug\HospitalApp.pdb
+D:\Practice\HospitalApp\HospitalApp\bin\Debug\WpfAnimatedGif.dll
+D:\Practice\HospitalApp\HospitalApp\bin\Debug\WpfAnimatedGif.pdb
+D:\Practice\HospitalApp\HospitalApp\bin\Debug\WpfAnimatedGif.xml
