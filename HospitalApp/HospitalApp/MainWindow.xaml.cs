@@ -1,125 +1,22 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Data.Entity;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
+using System.Windows.Threading;
+using WpfAnimatedGif;
 
 namespace HospitalApp
 {
-    public class AppUser // Переименован из User для избежания конфликта с EF User
-    {
-        public string RoleName { get; set; } // Используем строку вместо Role
-        public string FullName { get; set; }
-        public string ProfileIconPath { get; set; }
-    }
-
-    public class MainWindowViewModel : INotifyPropertyChanged
-    {
-        private Visibility _headerVisibility = Visibility.Hidden;
-        private Visibility _menuVisibility = Visibility.Hidden;
-        private string _userFullName;
-        private string _userProfileIcon;
-        private AppUser _currentUser;
-
-        public Visibility HeaderVisibility
-        {
-            get => _headerVisibility;
-            set
-            {
-                _headerVisibility = value;
-                OnPropertyChanged(nameof(HeaderVisibility));
-            }
-        }
-
-        public Visibility MenuVisibility
-        {
-            get => _menuVisibility;
-            set
-            {
-                _menuVisibility = value;
-                OnPropertyChanged(nameof(MenuVisibility));
-            }
-        }
-
-        public string UserFullName
-        {
-            get => _userFullName;
-            set
-            {
-                _userFullName = value;
-                OnPropertyChanged(nameof(UserFullName));
-            }
-        }
-
-        public string UserProfileIcon
-        {
-            get => _userProfileIcon;
-            set
-            {
-                _userProfileIcon = value;
-                OnPropertyChanged(nameof(UserProfileIcon));
-            }
-        }
-
-        public AppUser CurrentUser
-        {
-            get => _currentUser;
-            set
-            {
-                _currentUser = value;
-                UpdateUserProfile();
-            }
-        }
-
-        private void UpdateUserProfile()
-        {
-            if (_currentUser == null)
-            {
-                UserFullName = string.Empty;
-                UserProfileIcon = null;
-                return;
-            }
-
-            UserFullName = _currentUser.FullName;
-            switch (_currentUser.RoleName) // Используем RoleName вместо Role
-            {
-                case "Лаборант":
-                    UserProfileIcon = "/Resources/laborant_2.png";
-                    break;
-                case "Лаборант-Исследователь":
-                    UserProfileIcon = "/Resources/laborant_1.jpeg";
-                    break;
-                case "Лаборант-Администратор":
-                    UserProfileIcon = "/Resources/Администратор.png";
-                    break;
-                case "Бухгалтер":
-                    UserProfileIcon = "/Resources/Бухгалтер.jpeg";
-                    break;
-                case "Admin":
-                    UserProfileIcon = "/Resources/AdminIcon.png";
-                    break;
-                case "Doctor":
-                    UserProfileIcon = "/Resources/DoctorIcon.png";
-                    break;
-                case "Patient":
-                    UserProfileIcon = "/Resources/PatientIcon.png";
-                    break;
-                default:
-                    UserProfileIcon = "/Resources/DefaultIcon.png";
-                    break;
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
-
     public partial class MainWindow : Window
     {
         private readonly MainWindowViewModel _viewModel;
+        private bool _isMenuCollapsed = false;
 
         public MainWindow()
         {
@@ -127,7 +24,106 @@ namespace HospitalApp
             _viewModel = new MainWindowViewModel();
             DataContext = _viewModel;
             Manager.MainFrame = MainFrame;
+
+            // Инициализация состояния меню
+            _isMenuCollapsed = false;
+            MenuColumn.Width = new GridLength(120);
+            MainFrame.SetValue(Grid.ColumnSpanProperty, 1);
+
+            // Находим кнопку Exit и подписываемся на событие
+            if (MenuGrid.FindName("ExitBtn") is Button exitBtn)
+            {
+                // Удаляем предыдущие подписки, чтобы избежать дублирования
+                exitBtn.Click -= ExitBtn_Click; // Отписываемся на случай множественных подписок
+                exitBtn.Click += ExitBtn_Click;
+                System.Diagnostics.Debug.WriteLine("ExitBtn subscribed to Click event.");
+            }
+
+            // Проверка автоматической авторизации
+            try
+            {
+                int lastUserId = Properties.Settings.Default.LastUserId;
+                DateTime lastLoginTime = Properties.Settings.Default.LastLoginTime;
+                if (lastUserId > 0 && (DateTime.Now - lastLoginTime).TotalSeconds <= 5400)
+                {
+                    var user = HospitalBaseEntities.GetContext().User
+                        .Include(u => u.Role)
+                        .FirstOrDefault(u => u.User_Id == lastUserId);
+                    if (user != null)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Auto-login: UserId={user.User_Id}, Last_Login_Date={user.Last_Login_Date}");
+                        AuthorizeUser(user);
+                        MainFrame.Navigate(new MainPage(user.Role.Name));
+                        return;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка автоматической авторизации: {ex.Message}");
+            }
+
+            // Показать страницу авторизации
             MainFrame.Navigate(new AuthorizePage());
+            Activated += Window_Activated;
+        }
+
+        private void Window_Activated(object sender, EventArgs e)
+        {
+            if (MainFrame.Content is AuthorizePage authorizePage)
+            {
+                try
+                {
+                    var togglePasswordIcon = (Image)authorizePage.FindName("TogglePasswordIcon");
+                    if (togglePasswordIcon != null)
+                    {
+                        // Получаем текущую GIF или null (если статическое изображение)
+                        string gifPath = (string)authorizePage.GetType().GetField("_currentGifPath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(authorizePage);
+                        if (string.IsNullOrEmpty(gifPath))
+                        {
+                            // Статическое изображение, ничего не делаем
+                            System.Diagnostics.Debug.WriteLine("Window activated, static image: /Resources/eye_open.png");
+                            return;
+                        }
+
+                        // Перезапускаем анимацию
+                        var bitmap = new BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.UriSource = new Uri(gifPath, UriKind.Relative);
+                        bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.EndInit();
+
+                        Dispatcher.Invoke(() =>
+                        {
+                            ImageBehavior.SetAutoStart(togglePasswordIcon, false);
+                            ImageBehavior.SetAnimatedSource(togglePasswordIcon, bitmap);
+                            ImageBehavior.SetAnimationSpeedRatio(togglePasswordIcon, 2.0); // 2x скорость
+                            // Попытка установить начальный кадр
+                            try
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Set GIF start frame to 1: {gifPath}");
+                            }
+                            catch (Exception ex)
+                            {
+                                System.Diagnostics.Debug.WriteLine($"Ошибка установки начального кадра: {ex.Message}. Модифицируйте GIF, удалив первый кадр.");
+                            }
+                            ImageBehavior.SetAutoStart(togglePasswordIcon, true);
+                            togglePasswordIcon.InvalidateVisual();
+                            System.Diagnostics.Debug.WriteLine($"GIF animation restarted with path: {gifPath}, Speed: 2.0");
+                        }, DispatcherPriority.Render);
+
+                        // Запускаем таймер для повторного старта
+                        var startTimer = (DispatcherTimer)authorizePage.GetType().GetField("_gifStartTimer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(authorizePage);
+                        startTimer?.Stop();
+                        startTimer?.Start();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Ошибка при перезапуске GIF: {ex.Message}");
+                }
+            }
         }
 
         private void MainFrame_Navigated(object sender, NavigationEventArgs e)
@@ -146,13 +142,86 @@ namespace HospitalApp
 
         private void ProfileBtn_Click(object sender, RoutedEventArgs e)
         {
-            MainFrame.Navigate(new ProfilePage()); // Обновим позже, когда создадим ProfilePage
+            MainFrame.Navigate(new ProfilePage());
         }
 
-        public void AuthorizeUser(AppUser user)
+        public void AuthorizeUser(User user)
         {
             _viewModel.CurrentUser = user;
-            MainFrame.Navigate(new MainPage(UserData.CurrentUserRole)); // Передаем роль из UserData
+            UserData.CurrentUserId = user.User_Id;
+            UserData.CurrentUserRole = user.Role.Name;
+            UserData.CurrentUserName = user.Full_Name;
+
+            // Используем новый контекст для проверки и навигации
+            using (var context = new HospitalBaseEntities())
+            {
+                var dbUser = context.User
+                    .Include(u => u.Role)
+                    .FirstOrDefault(u => u.User_Id == user.User_Id);
+                if (dbUser != null)
+                {
+                    MainFrame.Navigate(new MainPage(dbUser.Role.Name));
+                }
+                else
+                {
+                    MessageBox.Show("Пользователь не найден в базе данных!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MainFrame.Navigate(new AuthorizePage());
+                    return;
+                }
+            }
+
+            // Сохраняем данные для автоматической авторизации
+            Properties.Settings.Default.LastUserId = user.User_Id;
+            Properties.Settings.Default.LastLoginTime = DateTime.Now;
+            Properties.Settings.Default.Save();
+        }
+
+        private void ExitBtn_Click(object sender, RoutedEventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("ExitBtn_Click triggered.");
+            var result = MessageBox.Show("Вы уверены, что хотите выйти из системы?", "Подтверждение выхода",
+                                        MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                // Сброс сохраненных данных авторизации
+                Properties.Settings.Default.LastUserId = 0;
+                Properties.Settings.Default.LastLoginTime = DateTime.MinValue;
+                Properties.Settings.Default.Save();
+
+                // Сброс текущего пользователя
+                _viewModel.CurrentUser = null;
+
+                // Переход на страницу авторизации
+                MainFrame.Navigate(new AuthorizePage());
+
+                System.Diagnostics.Debug.WriteLine("User logged out, credentials reset");
+            }
+        }
+        private void BurgerButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isMenuCollapsed = !_isMenuCollapsed;
+
+            if (_isMenuCollapsed)
+            {
+                // Скрываем меню
+                MenuColumn.Width = new GridLength(0);
+                MenuGrid.Visibility = Visibility.Collapsed;
+                MainFrame.SetValue(Grid.ColumnSpanProperty, 2);
+
+            }
+            else
+            {
+                // Показываем меню
+                MenuColumn.Width = new GridLength(120);
+                MenuGrid.Visibility = Visibility.Visible;
+                MainFrame.SetValue(Grid.ColumnSpanProperty, 1);
+
+            }
+
+            // Принудительное обновление layout
+            this.InvalidateVisual();
+            this.UpdateLayout();
         }
     }
 }

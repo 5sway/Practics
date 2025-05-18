@@ -20,14 +20,12 @@ namespace HospitalApp
             : base("name=HospitalBaseEntities")
         {
         }
-
         public static HospitalBaseEntities GetContext()
         {
             if (_context == null)
                 _context = new HospitalBaseEntities();
             return _context;
         }
-
     
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {

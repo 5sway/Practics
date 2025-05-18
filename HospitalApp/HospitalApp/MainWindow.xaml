@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:HospitalApp"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d" Icon="/Resources/logo.ico" ShowInTaskbar="True"
         Title='АИС "№20"' FontFamily="Calibri" MinHeight="350" MinWidth="600" MaxHeight="400" MaxWidth="1000">
     <Grid>
@@ -12,12 +13,13 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="120"/>
+            <ColumnDefinition Width="120" Name="MenuColumn"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
         <Grid Name="HeaderGrid" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Background="#6EDC82" Visibility="{Binding HeaderVisibility}">
-            <Button Background="Transparent" BorderThickness="0" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="80,0,0,0" Height="30" Width="30">
+            <Button Name="BurgerButton" Background="Transparent" BorderThickness="0" VerticalAlignment="Center" 
+                    HorizontalAlignment="Left" Margin="80,0,0,0" Height="30" Width="30" Click="BurgerButton_Click">
                 <Image Source="/Resources/BurgerIcon.png" Stretch="Fill"></Image>
             </Button>
             <Image Source="/Resources/logo.png" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Column="0" Width="40" Margin="5,0,0,0" Panel.ZIndex="10"/>
@@ -31,7 +33,7 @@
                         </Image>
                     </Button>
                     <TextBlock Text="{Binding UserFullName}" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="45,0,0,0" FontSize="12"/>
-                    <Button Name="ExitProfileBtn" FontSize="12" Width="25" Height="25" Content="Exit" VerticalAlignment="Center" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Foreground="White" Margin="0,0,10,0"/>
+                    <Button Name="ExitProfileBtn" FontSize="12" Width="25" Height="25" Content="Exit" VerticalAlignment="Center" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Foreground="White" Margin="0,0,10,0" Click="ExitBtn_Click"/>
                 </Grid>
             </Border>
         </Grid>
@@ -41,8 +43,8 @@
             <Button Name="ServiceBtn" Content="Service" FontSize="18" Padding="5" Background="#6EDC82" VerticalAlignment="Top" Height="50" BorderThickness="0" Margin="0,50,0,0" Grid.Row="1"/>
             <Button Name="OrderBtn" Content="Order" FontSize="18" Padding="5" Background="#6EDC82" VerticalAlignment="Top" Height="50" BorderThickness="0" Margin="0,100,0,0" Grid.Row="1"/>
             <Button Name="PacientBtn" Content="Pacient" FontSize="18" Padding="5" VerticalAlignment="Top" Height="50" Margin="0,150,0,0" BorderThickness="0" Background="#6EDC82" Grid.Row="1"/>
-            <Button Name="ExitBtn" Content="Exit" FontSize="18" Padding="5" VerticalAlignment="Bottom" Height="50" Margin="0,0,0,0" BorderThickness="0" Background="#6EDC82" Grid.Row="1"/>
+            <Button Name="ExitBtn" Content="Exit" FontSize="18" Padding="5" VerticalAlignment="Bottom" Height="50" Margin="0,0,0,0" BorderThickness="0" Background="#6EDC82" Grid.Row="1" Click="ExitBtn_Click"/>
         </Grid>
-        <Frame Name="MainFrame" NavigationUIVisibility="Hidden" Grid.Column="1" Grid.RowSpan="2" Navigated="MainFrame_Navigated"/>
+        <Frame Name="MainFrame" NavigationUIVisibility="Hidden" Grid.Column="1" Grid.Row="1" Grid.ColumnSpan="1" Navigated="MainFrame_Navigated"/>
     </Grid>
 </Window>

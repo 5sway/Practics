@@ -4,18 +4,19 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="8361f3224a2e401d94c883384dbaf6b4" Name="Diagram1">
-        <EntityTypeShape EntityType="HospitalBaseModel.Analyzer" Width="1.5" PointX="3.75" PointY="8.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="HospitalBaseModel.Insurance_Company" Width="1.5" PointX="1.5" PointY="13.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="HospitalBaseModel.Order" Width="1.5" PointX="3" PointY="5" IsExpanded="true" />
-        <EntityTypeShape EntityType="HospitalBaseModel.Pacient" Width="1.5" PointX="0.75" PointY="8.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="HospitalBaseModel.Role" Width="1.5" PointX="0.75" PointY="1.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="HospitalBaseModel.Service" Width="1.5" PointX="0.75" PointY="5" IsExpanded="true" />
-        <EntityTypeShape EntityType="HospitalBaseModel.Service_Provided" Width="1.5" PointX="6" PointY="5" IsExpanded="true" />
-        <EntityTypeShape EntityType="HospitalBaseModel.sysdiagrams" Width="1.5" PointX="5.75" PointY="0.875" IsExpanded="true" />
+      <Diagram DiagramId="d206b81482ef4a7fad0a52cc80d67925" Name="Diagram1">
+        <EntityTypeShape EntityType="HospitalBaseModel.Analyzer" Width="1.5" PointX="3.75" PointY="9.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="HospitalBaseModel.Insurance_Company" Width="1.5" PointX="0.75" PointY="8.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="HospitalBaseModel.Order" Width="1.5" PointX="3" PointY="5.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="HospitalBaseModel.Pacient" Width="1.5" PointX="0.75" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="HospitalBaseModel.Role" Width="1.5" PointX="0.75" PointY="12.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="HospitalBaseModel.Service" Width="1.5" PointX="0.75" PointY="5.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="HospitalBaseModel.Service_Provided" Width="1.5" PointX="6" PointY="5.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="HospitalBaseModel.sysdiagrams" Width="1.5" PointX="5.75" PointY="0.75" IsExpanded="true" />
         <EntityTypeShape EntityType="HospitalBaseModel.User" Width="1.5" PointX="3" PointY="0.75" IsExpanded="true" />
         <AssociationConnector Association="HospitalBaseModel.FK_Service_Provided_Analyzer" ManuallyRouted="false" />
         <AssociationConnector Association="HospitalBaseModel.FK_Pacient_Insurance_Company" ManuallyRouted="false" />
+        <AssociationConnector Association="HospitalBaseModel.FK_User_Insurance_Company" ManuallyRouted="false" />
         <AssociationConnector Association="HospitalBaseModel.FK_Order_Pacient" ManuallyRouted="false" />
         <AssociationConnector Association="HospitalBaseModel.FK_Order_Service" ManuallyRouted="false" />
         <AssociationConnector Association="HospitalBaseModel.FK_User_Role" ManuallyRouted="false" />

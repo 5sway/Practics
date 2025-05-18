@@ -26,9 +26,11 @@ namespace HospitalApp
         public string Password { get; set; }
         public System.DateTime Last_Login_Date { get; set; }
         public int Service_Id { get; set; }
+        public Nullable<int> Insurance_Company_Id { get; set; }
         public Nullable<decimal> Account { get; set; }
         public int Role_Id { get; set; }
     
+        public virtual Insurance_Company Insurance_Company { get; set; }
         public virtual Role Role { get; set; }
         public virtual Service Service { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

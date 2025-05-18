@@ -34,6 +34,7 @@
           <Property Name="Service_Id" Type="int" Nullable="false" />
           <Property Name="Order_Status" Type="bit" />
           <Property Name="Complete_Time" Type="datetime" />
+          <Property Name="BarCode" Type="int" />
         </EntityType>
         <EntityType Name="Pacient">
           <Key>
@@ -96,6 +97,7 @@
           <Property Name="Password" Type="varchar" MaxLength="100" Nullable="false" />
           <Property Name="Last_Login_Date" Type="datetime" Nullable="false" />
           <Property Name="Service_Id" Type="int" Nullable="false" />
+          <Property Name="Insurance_Company_Id" Type="int" />
           <Property Name="Account" Type="money" />
           <Property Name="Role_Id" Type="int" Nullable="false" />
         </EntityType>
@@ -171,6 +173,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_User_Insurance_Company">
+          <End Role="Insurance_Company" Type="Self.Insurance_Company" Multiplicity="0..1" />
+          <End Role="User" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Insurance_Company">
+              <PropertyRef Name="Insurance_Company_Id" />
+            </Principal>
+            <Dependent Role="User">
+              <PropertyRef Name="Insurance_Company_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_User_Role">
           <End Role="Role" Type="Self.Role" Multiplicity="1" />
           <End Role="User" Type="Self.User" Multiplicity="*" />
@@ -229,6 +243,10 @@
             <End Role="User" EntitySet="User" />
             <End Role="Service_Provided" EntitySet="Service_Provided" />
           </AssociationSet>
+          <AssociationSet Name="FK_User_Insurance_Company" Association="Self.FK_User_Insurance_Company">
+            <End Role="Insurance_Company" EntitySet="Insurance_Company" />
+            <End Role="User" EntitySet="User" />
+          </AssociationSet>
           <AssociationSet Name="FK_User_Role" Association="Self.FK_User_Role">
             <End Role="Role" EntitySet="Role" />
             <End Role="User" EntitySet="User" />
@@ -263,6 +281,7 @@
           <Property Name="Current_Account" Type="Int32" Nullable="false" />
           <Property Name="BIC" Type="Int32" Nullable="false" />
           <NavigationProperty Name="Pacient" Relationship="Self.FK_Pacient_Insurance_Company" FromRole="Insurance_Company" ToRole="Pacient" />
+          <NavigationProperty Name="User" Relationship="Self.FK_User_Insurance_Company" FromRole="Insurance_Company" ToRole="User" />
         </EntityType>
         <EntityType Name="Order">
           <Key>
@@ -274,6 +293,7 @@
           <Property Name="Service_Id" Type="Int32" Nullable="false" />
           <Property Name="Order_Status" Type="Boolean" />
           <Property Name="Complete_Time" Type="DateTime" Precision="3" />
+          <Property Name="BarCode" Type="Int32" />
           <NavigationProperty Name="Pacient" Relationship="Self.FK_Order_Pacient" FromRole="Order" ToRole="Pacient" />
           <NavigationProperty Name="Service" Relationship="Self.FK_Order_Service" FromRole="Order" ToRole="Service" />
         </EntityType>
@@ -347,8 +367,10 @@
           <Property Name="Password" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Last_Login_Date" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="Service_Id" Type="Int32" Nullable="false" />
+          <Property Name="Insurance_Company_Id" Type="Int32" />
           <Property Name="Account" Type="Decimal" Precision="19" Scale="4" />
           <Property Name="Role_Id" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Insurance_Company" Relationship="Self.FK_User_Insurance_Company" FromRole="User" ToRole="Insurance_Company" />
           <NavigationProperty Name="Role" Relationship="Self.FK_User_Role" FromRole="User" ToRole="Role" />
           <NavigationProperty Name="Service" Relationship="Self.FK_User_Service" FromRole="User" ToRole="Service" />
           <NavigationProperty Name="Service_Provided" Relationship="Self.FK_Service_Provided_User" FromRole="User" ToRole="Service_Provided" />
@@ -373,6 +395,18 @@
               <PropertyRef Name="Insurance_Company_Id" />
             </Principal>
             <Dependent Role="Pacient">
+              <PropertyRef Name="Insurance_Company_Id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_User_Insurance_Company">
+          <End Role="Insurance_Company" Type="Self.Insurance_Company" Multiplicity="0..1" />
+          <End Role="User" Type="Self.User" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Insurance_Company">
+              <PropertyRef Name="Insurance_Company_Id" />
+            </Principal>
+            <Dependent Role="User">
               <PropertyRef Name="Insurance_Company_Id" />
             </Dependent>
           </ReferentialConstraint>
@@ -467,6 +501,10 @@
             <End Role="Insurance_Company" EntitySet="Insurance_Company" />
             <End Role="Pacient" EntitySet="Pacient" />
           </AssociationSet>
+          <AssociationSet Name="FK_User_Insurance_Company" Association="Self.FK_User_Insurance_Company">
+            <End Role="Insurance_Company" EntitySet="Insurance_Company" />
+            <End Role="User" EntitySet="User" />
+          </AssociationSet>
           <AssociationSet Name="FK_Order_Pacient" Association="Self.FK_Order_Pacient">
             <End Role="Pacient" EntitySet="Pacient" />
             <End Role="Order" EntitySet="Order" />
@@ -528,6 +566,7 @@
                 <ScalarProperty Name="Service_Id" ColumnName="Service_Id" />
                 <ScalarProperty Name="Order_Status" ColumnName="Order_Status" />
                 <ScalarProperty Name="Complete_Time" ColumnName="Complete_Time" />
+                <ScalarProperty Name="BarCode" ColumnName="BarCode" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -596,6 +635,7 @@
                 <ScalarProperty Name="Password" ColumnName="Password" />
                 <ScalarProperty Name="Last_Login_Date" ColumnName="Last_Login_Date" />
                 <ScalarProperty Name="Service_Id" ColumnName="Service_Id" />
+                <ScalarProperty Name="Insurance_Company_Id" ColumnName="Insurance_Company_Id" />
                 <ScalarProperty Name="Account" ColumnName="Account" />
                 <ScalarProperty Name="Role_Id" ColumnName="Role_Id" />
               </MappingFragment>

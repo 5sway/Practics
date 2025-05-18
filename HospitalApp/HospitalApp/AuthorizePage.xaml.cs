@@ -13,98 +13,6 @@ using WpfAnimatedGif;
 
 namespace HospitalApp
 {
-    public class AuthorizePageViewModel : INotifyPropertyChanged
-    {
-        private Visibility _inputVisibility = Visibility.Visible;
-        private Visibility _captchaVisibility = Visibility.Hidden;
-        private Visibility _errorVisibility = Visibility.Hidden;
-        private string _errorMessage = "";
-        private bool _isInputEnabled = true;
-        private int _failedAttempts = 0;
-        private DateTime? _captchaGraceUntil = null;
-        private readonly TimeSpan _captchaGracePeriod = TimeSpan.FromMinutes(1);
-        private DateTime? _inputLockUntil = null;
-        private readonly TimeSpan _inputLockPeriod = TimeSpan.FromMinutes(10);
-
-        public Visibility InputVisibility
-        {
-            get => _inputVisibility;
-            set
-            {
-                _inputVisibility = value;
-                OnPropertyChanged(nameof(InputVisibility));
-            }
-        }
-
-        public Visibility CaptchaVisibility
-        {
-            get => _captchaVisibility;
-            set
-            {
-                _captchaVisibility = value;
-                OnPropertyChanged(nameof(CaptchaVisibility));
-            }
-        }
-
-        public Visibility ErrorVisibility
-        {
-            get => _errorVisibility;
-            set
-            {
-                _errorVisibility = value;
-                OnPropertyChanged(nameof(ErrorVisibility));
-            }
-        }
-
-        public string ErrorMessage
-        {
-            get => _errorMessage;
-            set
-            {
-                _errorMessage = value;
-                OnPropertyChanged(nameof(ErrorMessage));
-            }
-        }
-
-        public bool IsInputEnabled
-        {
-            get => _isInputEnabled;
-            set
-            {
-                _isInputEnabled = value;
-                OnPropertyChanged(nameof(IsInputEnabled));
-            }
-        }
-
-        public int FailedAttempts
-        {
-            get => _failedAttempts;
-            set => _failedAttempts = value;
-        }
-
-        public DateTime? CaptchaGraceUntil
-        {
-            get => _captchaGraceUntil;
-            set => _captchaGraceUntil = value;
-        }
-
-        public TimeSpan CaptchaGracePeriod => _captchaGracePeriod;
-
-        public DateTime? InputLockUntil
-        {
-            get => _inputLockUntil;
-            set => _inputLockUntil = value;
-        }
-
-        public TimeSpan InputLockPeriod => _inputLockPeriod;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-    }
-
     public partial class AuthorizePage : Page
     {
         [DllImport("winmm.dll")]
@@ -121,6 +29,8 @@ namespace HospitalApp
         private DispatcherTimer _smoothTimer;
         private bool _isPasswordVisible = false;
         private DispatcherTimer _gifStopTimer;
+        private DispatcherTimer _gifStartTimer;
+        private string _currentGifPath;
 
         public AuthorizePage()
         {
@@ -131,16 +41,25 @@ namespace HospitalApp
             ResetLoginUI();
             timeBeginPeriod(1);
 
-            PasswordTextBoxVisible.TextChanged += (s, e) => UpdatePlaceholderVisibility();
+            PasswordTextBoxVisible.TextChanged += (s, e) => UpdatePasswordFieldState();
+            PasswordTextBox.PasswordChanged += (s, e) => UpdatePasswordFieldState();
 
             try
             {
+                _currentGifPath = "/Resources/eye_animation.gif";
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(_currentGifPath, UriKind.Relative);
+                bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                ImageBehavior.SetAnimatedSource(TogglePasswordIcon, bitmap);
                 ImageBehavior.SetAutoStart(TogglePasswordIcon, false);
-                ImageBehavior.SetAnimatedSource(TogglePasswordIcon, new BitmapImage(new Uri("/Resources/eye_closed_open.gif", UriKind.Relative)));
+                System.Diagnostics.Debug.WriteLine($"Initial GIF loaded: {_currentGifPath}, stopped");
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка инициализации GIF: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Ошибка загрузки начальной GIF: {ex.Message}");
             }
         }
 
@@ -169,14 +88,33 @@ namespace HospitalApp
 
             _gifStopTimer = new DispatcherTimer(DispatcherPriority.Send)
             {
-                Interval = TimeSpan.FromSeconds(1) // Предполагаемая длительность GIF
+                Interval = TimeSpan.FromSeconds(1.0) // Временно 1 сек, проверьте длительность GIF в Ezgif.com
+                // Ожидаемая длительность ~1.5 сек / 2x = 0.75 сек
             };
             _gifStopTimer.Tick += (s, e) =>
             {
-                if (!_isPasswordVisible)
-                    ImageBehavior.SetAutoStart(TogglePasswordIcon, false);
+                ImageBehavior.SetAutoStart(TogglePasswordIcon, false);
                 _gifStopTimer.Stop();
+                System.Diagnostics.Debug.WriteLine($"GIF animation stopped: {_currentGifPath}");
             };
+
+            _gifStartTimer = new DispatcherTimer(DispatcherPriority.Render)
+            {
+                Interval = TimeSpan.FromMilliseconds(200) // Увеличено для надежного запуска
+            };
+            _gifStartTimer.Tick += (s, e) =>
+            {
+                ImageBehavior.SetAutoStart(TogglePasswordIcon, true);
+                System.Diagnostics.Debug.WriteLine($"Forced GIF start: {_currentGifPath}");
+                _gifStartTimer.Stop();
+            };
+        }
+
+        private void UpdatePasswordFieldState()
+        {
+            string password = _isPasswordVisible ? PasswordTextBoxVisible.Text : PasswordTextBox.Password;
+            _viewModel.IsPasswordNotEmpty = !string.IsNullOrEmpty(password);
+            UpdatePlaceholderVisibility();
         }
 
         private void SmoothTimer_Tick(object sender, EventArgs e)
@@ -214,35 +152,56 @@ namespace HospitalApp
             _isPasswordVisible = !_isPasswordVisible;
             try
             {
+                System.Diagnostics.Debug.WriteLine($"Toggling password visibility: {_isPasswordVisible}");
+
                 if (_isPasswordVisible)
                 {
                     PasswordTextBoxVisible.Text = PasswordTextBox.Password;
                     PasswordTextBox.Visibility = Visibility.Collapsed;
                     PasswordTextBoxVisible.Visibility = Visibility.Visible;
-                    // Запуск GIF с начала
-                    ImageBehavior.SetAutoStart(TogglePasswordIcon, false);
-                    ImageBehavior.SetAnimatedSource(TogglePasswordIcon, null);
-                    ImageBehavior.SetAnimatedSource(TogglePasswordIcon, new BitmapImage(new Uri("/Resources/eye_closed_open.gif", UriKind.Relative)));
-                    ImageBehavior.SetAutoStart(TogglePasswordIcon, true);
-                    _gifStopTimer.Stop(); // Остановить таймер, если был запущен
                 }
                 else
                 {
                     PasswordTextBox.Password = PasswordTextBoxVisible.Text;
                     PasswordTextBoxVisible.Visibility = Visibility.Collapsed;
                     PasswordTextBox.Visibility = Visibility.Visible;
-                    // Запуск GIF и остановка через таймер
-                    ImageBehavior.SetAutoStart(TogglePasswordIcon, false);
-                    ImageBehavior.SetAnimatedSource(TogglePasswordIcon, null);
-                    ImageBehavior.SetAnimatedSource(TogglePasswordIcon, new BitmapImage(new Uri("/Resources/eye_closed_open.gif", UriKind.Relative)));
-                    ImageBehavior.SetAutoStart(TogglePasswordIcon, true);
-                    _gifStopTimer.Start(); // Запустить таймер для остановки
                 }
+
+                // Используем одну гифку для обоих состояний
+                string newGifPath = "/Resources/eye_animation.gif";
+
+                // Получаем текущий контроллер анимации
+                var controller = ImageBehavior.GetAnimationController(TogglePasswordIcon);
+
+                // Если анимация уже запущена (проверяем через controller != null)
+                if (controller != null && controller.IsPaused == false)
+                {
+                    // Сбрасываем анимацию
+                    ImageBehavior.SetAnimatedSource(TogglePasswordIcon, null);
+                    System.Diagnostics.Debug.WriteLine("GIF animation reset");
+                }
+                else
+                {
+                    // Создаем новый BitmapImage без кэширования
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.UriSource = new Uri(newGifPath, UriKind.Relative);
+                    bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.EndInit();
+
+                    // Устанавливаем новую анимацию и проигрываем один раз
+                    ImageBehavior.SetAnimatedSource(TogglePasswordIcon, bitmap);
+                    ImageBehavior.SetRepeatBehavior(TogglePasswordIcon, new System.Windows.Media.Animation.RepeatBehavior(1));
+                    ImageBehavior.SetAutoStart(TogglePasswordIcon, true);
+                    System.Diagnostics.Debug.WriteLine("Starting GIF animation once");
+                }
+
                 UpdatePlaceholderVisibility();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка при переключении GIF: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"Ошибка при переключении GIF: {ex.Message}");
             }
         }
 
@@ -281,7 +240,7 @@ namespace HospitalApp
             }
             else
             {
-                ErrorText.Margin = new Thickness(0, 200, 140, 0);
+                ErrorText.Margin = new Thickness(0, 180, 140, 0);
             }
 
             _errorTimer.Start();
@@ -350,7 +309,7 @@ namespace HospitalApp
                 return;
             }
 
-            var user = HospitalBaseEntities.GetContext().User
+                var user = HospitalBaseEntities.GetContext().User
                 .Include(u => u.Role)
                 .FirstOrDefault(u => u.Login == login && u.Password == password);
 
@@ -450,7 +409,21 @@ namespace HospitalApp
                 PasswordTextBoxVisible.Clear();
             }
 
+            try
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    ImageBehavior.SetAnimatedSource(TogglePasswordIcon, null);
+                    System.Diagnostics.Debug.WriteLine("GIF animation reset in ResetLoginUI");
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка при сбросе GIF: {ex.Message}");
+            }
+
             UpdatePlaceholderVisibility();
+
         }
 
         private void AuthorizeUser()
@@ -473,15 +446,38 @@ namespace HospitalApp
                 return;
             }
 
+            // Обновление Last_Login_Date
+            try
+            {
+                user.Last_Login_Date = DateTime.Now;
+                HospitalBaseEntities.GetContext().SaveChanges();
+                System.Diagnostics.Debug.WriteLine($"Updated Last_Login_Date for user {user.Login}: {user.Last_Login_Date}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка обновления Last_Login_Date: {ex.Message}");
+                ShowError("Ошибка сохранения данных входа!");
+                return;
+            }
+
+            // Сохранение данных для автоматической авторизации
+            try
+            {
+                Properties.Settings.Default.LastUserId = user.User_Id;
+                Properties.Settings.Default.LastLoginTime = DateTime.Now;
+                Properties.Settings.Default.Save();
+                System.Diagnostics.Debug.WriteLine($"Saved auto-login: UserId={user.User_Id}, Time={DateTime.Now}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Ошибка сохранения настроек авторизации: {ex.Message}");
+            }
+
             UserData.CurrentUserId = user.User_Id;
             UserData.CurrentUserRole = user.Role.Name;
             UserData.CurrentUserName = user.Full_Name;
 
-            ((MainWindow)Application.Current.MainWindow).AuthorizeUser(new AppUser
-            {
-                RoleName = user.Role.Name,
-                FullName = user.Full_Name
-            });
+            ((MainWindow)Application.Current.MainWindow).AuthorizeUser(user);
 
             ResetLoginUI();
         }

@@ -20,6 +20,7 @@ namespace HospitalApp
         public int Service_Id { get; set; }
         public Nullable<bool> Order_Status { get; set; }
         public Nullable<System.DateTime> Complete_Time { get; set; }
+        public Nullable<int> BarCode { get; set; }
     
         public virtual Pacient Pacient { get; set; }
         public virtual Service Service { get; set; }

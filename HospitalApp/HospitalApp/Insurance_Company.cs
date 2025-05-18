@@ -18,6 +18,7 @@ namespace HospitalApp
         public Insurance_Company()
         {
             this.Pacient = new HashSet<Pacient>();
+            this.User = new HashSet<User>();
         }
     
         public int Insurance_Company_Id { get; set; }
@@ -29,5 +30,7 @@ namespace HospitalApp
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Pacient> Pacient { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<User> User { get; set; }
     }
 }

@@ -29,6 +29,7 @@
     <Property Name="Service_Id" Type="int" Nullable="false" />
     <Property Name="Order_Status" Type="bit" />
     <Property Name="Complete_Time" Type="datetime" />
+    <Property Name="BarCode" Type="int" />
   </EntityType>
   <EntityType Name="Pacient">
     <Key>
@@ -91,6 +92,7 @@
     <Property Name="Password" Type="varchar" MaxLength="100" Nullable="false" />
     <Property Name="Last_Login_Date" Type="datetime" Nullable="false" />
     <Property Name="Service_Id" Type="int" Nullable="false" />
+    <Property Name="Insurance_Company_Id" Type="int" />
     <Property Name="Account" Type="money" />
     <Property Name="Role_Id" Type="int" Nullable="false" />
   </EntityType>
@@ -166,6 +168,18 @@
       </Dependent>
     </ReferentialConstraint>
   </Association>
+  <Association Name="FK_User_Insurance_Company">
+    <End Role="Insurance_Company" Type="Self.Insurance_Company" Multiplicity="0..1" />
+    <End Role="User" Type="Self.User" Multiplicity="*" />
+    <ReferentialConstraint>
+      <Principal Role="Insurance_Company">
+        <PropertyRef Name="Insurance_Company_Id" />
+      </Principal>
+      <Dependent Role="User">
+        <PropertyRef Name="Insurance_Company_Id" />
+      </Dependent>
+    </ReferentialConstraint>
+  </Association>
   <Association Name="FK_User_Role">
     <End Role="Role" Type="Self.Role" Multiplicity="1" />
     <End Role="User" Type="Self.User" Multiplicity="*" />
@@ -223,6 +237,10 @@
     <AssociationSet Name="FK_Service_Provided_User" Association="Self.FK_Service_Provided_User">
       <End Role="User" EntitySet="User" />
       <End Role="Service_Provided" EntitySet="Service_Provided" />
+    </AssociationSet>
+    <AssociationSet Name="FK_User_Insurance_Company" Association="Self.FK_User_Insurance_Company">
+      <End Role="Insurance_Company" EntitySet="Insurance_Company" />
+      <End Role="User" EntitySet="User" />
     </AssociationSet>
     <AssociationSet Name="FK_User_Role" Association="Self.FK_User_Role">
       <End Role="Role" EntitySet="Role" />
