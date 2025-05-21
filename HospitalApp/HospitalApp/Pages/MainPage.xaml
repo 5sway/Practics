@@ -1,0 +1,261 @@
+﻿<Page x:Class="HospitalApp.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:HospitalApp"
+      mc:Ignorable="d"
+      d:DesignHeight="600" d:DesignWidth="1000"
+      Title="MainPage"
+      FontFamily="Calibri" Background="#F5F5F5">
+    <Page.Resources>
+        <local:StatusToTextConverter x:Key="StatusToTextConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Page.Resources>
+    <Grid Margin="10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Вкладки -->
+        <TabControl x:Name="MainTabControl" Grid.Row="1" Background="White" BorderBrush="#0078D7">
+            <!-- Вкладка Лаборанта -->
+            <TabItem x:Name="LabTab" Header="Лаборант">
+                <ScrollViewer x:Name="LabTabScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBox x:Name="BarcodeInput" Width="200" Margin="0,0,10,0" Text="{Binding SuggestedBarcode, UpdateSourceTrigger=PropertyChanged}" KeyDown="BarcodeInput_KeyDown"/>
+                            <Button x:Name="ScanButton" Content="Сканировать" Width="100" Margin="0,0,10,0" Click="ScanButton_Click" Background="#28A745" Foreground="White"/>
+                            <Button x:Name="ReceiveButton" Content="Получить биоматериалы" Width="150" Click="ReceiveButton_Click" Background="#28A745" Foreground="White"/>
+                        </StackPanel>
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <DataGrid x:Name="PatientsGrid" AutoGenerateColumns="False" IsReadOnly="True" Margin="0,0,5,0" Height="200" HorizontalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave" PreviewKeyDown="LabDataGrid_PreviewKeyDown">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="ФИО" Binding="{Binding Full_Name}" Width="*"/>
+                                    <DataGridTextColumn Header="Дата рождения" Binding="{Binding Birth_Date, StringFormat=dd.MM.yyyy}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Полис" Binding="{Binding Policy}" Width="Auto"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <DataGrid x:Name="OrdersGrid" AutoGenerateColumns="False" IsReadOnly="True" Margin="5,0,0,0" Grid.Column="2" Height="200" HorizontalAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave" PreviewKeyDown="LabDataGrid_PreviewKeyDown">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Штрих-код" Binding="{Binding BarCode}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Пациент" Binding="{Binding Pacient.Full_Name}" Width="*"/>
+                                    <DataGridTextColumn Header="Услуга" Binding="{Binding Service.Title}" Width="*"/>
+                                    <DataGridTextColumn Header="Дата создания" Binding="{Binding Create_Date, StringFormat=dd.MM.yyyy HH:mm}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Статус" Width="Auto">
+                                        <DataGridTextColumn.Binding>
+                                            <MultiBinding Converter="{StaticResource StatusToTextConverter}">
+                                                <Binding Path="Order_Status"/>
+                                                <Binding Path="Complete_Time"/>
+                                            </MultiBinding>
+                                        </DataGridTextColumn.Binding>
+                                    </DataGridTextColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+            <!-- Вкладка Лаборанта-Исследователя -->
+            <TabItem x:Name="ResearcherTab" Header="Лаборант-Исследователь">
+                <ScrollViewer x:Name="ResearcherTabScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <DatePicker x:Name="DateProvidedPicker" Width="120" Margin="0,0,10,0" SelectedDate="{Binding SelectedDateProvided}"/>
+                            <Button x:Name="AnalyzeButton" Content="Проанализировать" Width="120" Click="AnalyzeButton_Click" Background="#28A745" Foreground="White"/>
+                        </StackPanel>
+                        <DataGrid x:Name="ServiceProvidedGrid" AutoGenerateColumns="False" Grid.Row="1" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" SelectionChanged="ServiceProvidedGrid_SelectionChanged" IsReadOnly="True" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Пользователь" Binding="{Binding User.Full_Name}" Width="*"/>
+                                <DataGridTextColumn Header="Услуга" Binding="{Binding Service.Title}" Width="*"/>
+                                <DataGridTextColumn Header="Анализатор" Binding="{Binding Analyzer_Id}" Width="Auto"/>
+                                <DataGridTextColumn Header="Дата предоставления" Binding="{Binding Date_Provided, StringFormat=dd.MM.yyyy}" Width="Auto"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+            <!-- Вкладка Администратора -->
+            <TabItem x:Name="AdminTab" Header="Администратор">
+                <ScrollViewer x:Name="AdminTabScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <DataGrid x:Name="AdminPatientsGrid" AutoGenerateColumns="False" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,0,0,5" 
+                                  IsReadOnly="{Binding IsPatientsGridReadOnly}" 
+                                  CellEditEnding="DataGrid_CellEditEnding" 
+                                  SelectionChanged="DataGrid_SelectionChanged" 
+                                  PreviewKeyDown="DataGrid_PreviewKeyDown" 
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ФИО" Binding="{Binding Full_Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                <DataGridTextColumn Header="Дата рождения" Binding="{Binding Birth_Date, StringFormat=dd.MM.yyyy, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridTextColumn Header="Полис" Binding="{Binding Policy, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <DataGrid x:Name="AdminOrdersGrid" AutoGenerateColumns="False" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,5" Grid.Row="1" 
+                                  IsReadOnly="{Binding IsOrdersGridReadOnly}" 
+                                  CellEditEnding="DataGrid_CellEditEnding" 
+                                  SelectionChanged="DataGrid_SelectionChanged" 
+                                  PreviewKeyDown="DataGrid_PreviewKeyDown" 
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                            <DataGrid.Columns>
+                                <DataGridComboBoxColumn Header="Пациент" 
+                                                        SelectedValueBinding="{Binding Pacient_Id, UpdateSourceTrigger=PropertyChanged}" 
+                                                        DisplayMemberPath="Full_Name" 
+                                                        SelectedValuePath="Pacient_Id" 
+                                                        Width="*"/>
+                                <DataGridComboBoxColumn Header="Услуга" 
+                                                        SelectedValueBinding="{Binding Service_Id, UpdateSourceTrigger=PropertyChanged}" 
+                                                        DisplayMemberPath="Title" 
+                                                        SelectedValuePath="Service_Id" 
+                                                        Width="*"/>
+                                <DataGridTextColumn Header="Дата создания" Binding="{Binding Create_Date, StringFormat=dd.MM.yyyy HH:mm, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridComboBoxColumn Header="Статус" 
+                                                        SelectedValueBinding="{Binding Order_Status, UpdateSourceTrigger=PropertyChanged}" 
+                                                        ItemsSource="{Binding StatusOptions}" 
+                                                        Width="Auto"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <DataGrid x:Name="ServicesGrid" AutoGenerateColumns="False" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,5" Grid.Row="2" 
+                                  IsReadOnly="{Binding IsServicesGridReadOnly}" 
+                                  CellEditEnding="DataGrid_CellEditEnding" 
+                                  SelectionChanged="DataGrid_SelectionChanged" 
+                                  PreviewKeyDown="DataGrid_PreviewKeyDown" 
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Название" Binding="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat=C2, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridTextColumn Header="Срок (дни)" Binding="{Binding Deadline, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        <DataGrid x:Name="UsersGrid" AutoGenerateColumns="False" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,0" Grid.Row="3" 
+                                  IsReadOnly="{Binding IsUsersGridReadOnly}" 
+                                  CellEditEnding="DataGrid_CellEditEnding" 
+                                  SelectionChanged="DataGrid_SelectionChanged" 
+                                  PreviewKeyDown="DataGrid_PreviewKeyDown" 
+                                  ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="ФИО" Binding="{Binding Full_Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                <DataGridComboBoxColumn Header="Роль" 
+                                                        SelectedValueBinding="{Binding Role_Id, UpdateSourceTrigger=PropertyChanged}" 
+                                                        DisplayMemberPath="Name" 
+                                                        SelectedValuePath="Role_Id" 
+                                                        Width="Auto"/>
+                                <DataGridTextColumn Header="Логин" Binding="{Binding Login, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridTextColumn Header="Счет" Binding="{Binding Account, StringFormat=C2, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridComboBoxColumn Header="Страх. компания" 
+                                                        SelectedValueBinding="{Binding Insurance_Company_Id, UpdateSourceTrigger=PropertyChanged}" 
+                                                        DisplayMemberPath="Title" 
+                                                        SelectedValuePath="Insurance_Company_Id" 
+                                                        Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+            <!-- Вкладка Бухгалтера -->
+            <TabItem x:Name="AccountantTab" Header="Бухгалтер">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel>
+                            <DataGrid x:Name="InsuranceCompaniesGrid" AutoGenerateColumns="False" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,0,0,5" 
+                                      IsReadOnly="True" SelectionChanged="InsuranceCompaniesGrid_SelectionChanged" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Название" Binding="{Binding Title}" Width="*"/>
+                                    <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" Width="*"/>
+                                    <DataGridTextColumn Header="ИНН" Binding="{Binding TIN}" Width="Auto"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                            <DataGrid x:Name="BillsGrid" AutoGenerateColumns="False" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,5" IsReadOnly="True" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Компания" Binding="{Binding Insurance_Company.Title}" Width="*"/>
+                                    <DataGridTextColumn Header="Сумма" Binding="{Binding Account, StringFormat=C2}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Дата выставления" Binding="{Binding TempBillDate, StringFormat=dd.MM.yyyy}" Width="Auto"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,10,0,10" HorizontalAlignment="Center">
+                        <TextBox x:Name="InsuranceCompanyTextBox" Width="200" Margin="0,0,10,0" Text="{Binding SelectedInsuranceCompanyTitle, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="True" IsEnabled="False"/>
+                        <ComboBox x:Name="PatientsComboBox" Width="200" Margin="0,0,10,0" ItemsSource="{Binding AvailablePatients}" DisplayMemberPath="Full_Name" SelectedItem="{Binding SelectedPatient}" IsEnabled="False"/>
+                        <TextBox x:Name="BillAmountTextBox" Width="100" Margin="0,0,10,0" Text="{Binding BillAmount, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Button x:Name="IssueBillButton" Content="Выставить счет" Width="120" Click="IssueBillButton_Click" Background="#28A745" Foreground="White"/>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            <!-- Вкладка Отчетов -->
+            <TabItem x:Name="ReportsTab" Header="Отчеты">
+                <ScrollViewer x:Name="ReportsTabScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <Grid Margin="10">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <GroupBox Header="Формат отчета" Grid.Row="0" Margin="0,0,0,10">
+                            <StackPanel Orientation="Horizontal">
+                                <ComboBox x:Name="ReportFormatCombo" Width="100" Margin="5" SelectionChanged="ReportFormatCombo_SelectionChanged">
+                                    <ComboBoxItem>Word</ComboBoxItem>
+                                    <ComboBoxItem>PDF</ComboBoxItem>
+                                    <ComboBoxItem>Excel</ComboBoxItem>
+                                </ComboBox>
+                                <CheckBox x:Name="TableFormatCheckBox" Content="Табличный формат" IsChecked="{Binding IsTableFormat, UpdateSourceTrigger=PropertyChanged}" Margin="10,0,0,0" Visibility="{Binding IsTableFormatVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="Таблицы для включения" Grid.Row="1" Margin="0,0,0,10">
+                            <StackPanel>
+                                <CheckBox x:Name="AllTablesCheckBox" Content="Все таблицы" IsChecked="{Binding AllTablesSelected, UpdateSourceTrigger=PropertyChanged}" Margin="5" Checked="AllTablesCheckBox_Checked" Unchecked="AllTablesCheckBox_Unchecked"/>
+                                <CheckBox x:Name="PatientsTableCheckBox" Content="Пациенты" IsChecked="{Binding PatientsTableSelected, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding AreTableCheckBoxesEnabled}" Margin="5" Unchecked="TableCheckBox_Unchecked"/>
+                                <ComboBox x:Name="PatientsRecordsCombo" ItemsSource="{Binding PatientRecords}" DisplayMemberPath="Full_Name" SelectedItem="{Binding SelectedPatientRecord}" Margin="20,0,0,5" Visibility="{Binding PatientsRecordsComboVisible}"/>
+                                <CheckBox x:Name="OrdersTableCheckBox" Content="Заказы" IsChecked="{Binding OrdersTableSelected, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding AreTableCheckBoxesEnabled}" Margin="5" Unchecked="TableCheckBox_Unchecked"/>
+                                <ComboBox x:Name="OrdersRecordsCombo" ItemsSource="{Binding OrderRecords}" DisplayMemberPath="BarCode" SelectedItem="{Binding SelectedOrderRecord}" Margin="20,0,0,5" Visibility="{Binding OrdersRecordsComboVisible}"/>
+                                <CheckBox x:Name="ServicesTableCheckBox" Content="Услуги" IsChecked="{Binding ServicesTableSelected, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding AreTableCheckBoxesEnabled}" Margin="5" Unchecked="TableCheckBox_Unchecked"/>
+                                <ComboBox x:Name="ServicesRecordsCombo" ItemsSource="{Binding ServiceRecords}" DisplayMemberPath="Title" SelectedItem="{Binding SelectedServiceRecord}" Margin="20,0,0,5" Visibility="{Binding ServicesRecordsComboVisible}"/>
+                                <CheckBox x:Name="UsersTableCheckBox" Content="Пользователи" IsChecked="{Binding UsersTableSelected, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding AreTableCheckBoxesEnabled}" Margin="5" Unchecked="TableCheckBox_Unchecked"/>
+                                <ComboBox x:Name="UsersRecordsCombo" ItemsSource="{Binding UserRecords}" DisplayMemberPath="Full_Name" SelectedItem="{Binding SelectedUserRecord}" Margin="20,0,0,5" Visibility="{Binding UsersRecordsComboVisible}"/>
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="Период отчета" Grid.Row="2" Margin="0,0,0,10">
+                            <StackPanel>
+                                <DatePicker x:Name="StartDatePicker" Margin="5" SelectedDate="{Binding StartDate}"/>
+                                <DatePicker x:Name="EndDatePicker" Margin="5" SelectedDate="{Binding EndDate}"/>
+                            </StackPanel>
+                        </GroupBox>
+                    </Grid>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+        <!-- Кнопки управления -->
+        <StackPanel x:Name="AdminButtonsPanel" Orientation="Horizontal" Grid.Row="2" Margin="0,10,0,0" HorizontalAlignment="Right" Visibility="{Binding AdminButtonsVisibility}">
+            <Button x:Name="AddButton" Content="Добавить" Width="100" Margin="0,0,10,0" Click="AddButton_Click" Background="#28A745" Foreground="White" Visibility="{Binding IsAdminTabSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Button x:Name="EditButton" Content="Изменить" Width="100" Margin="0,0,10,0" Click="EditButton_Click" Background="#28A745" Foreground="White" Visibility="{Binding IsAdminTabSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Button x:Name="DeleteButton" Content="Удалить" Width="100" Margin="0,0,10,0" Click="DeleteButton_Click" Background="#28A745" Foreground="White" Visibility="{Binding IsAdminTabSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Button x:Name="GenerateReportButton" Content="Сформировать отчет" Width="150" Margin="0,0,10,0" Click="GenerateReport_Click" Background="#28A745" Foreground="White" Visibility="{Binding IsReportsTabSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        </StackPanel>
+    </Grid>
+</Page>

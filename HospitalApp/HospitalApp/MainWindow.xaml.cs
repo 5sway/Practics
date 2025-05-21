@@ -16,7 +16,6 @@ namespace HospitalApp
     public partial class MainWindow : Window
     {
         private readonly MainWindowViewModel _viewModel;
-        private bool _isMenuCollapsed = false;
 
         public MainWindow()
         {
@@ -24,20 +23,6 @@ namespace HospitalApp
             _viewModel = new MainWindowViewModel();
             DataContext = _viewModel;
             Manager.MainFrame = MainFrame;
-
-            // Инициализация состояния меню
-            _isMenuCollapsed = false;
-            MenuColumn.Width = new GridLength(120);
-            MainFrame.SetValue(Grid.ColumnSpanProperty, 1);
-
-            // Находим кнопку Exit и подписываемся на событие
-            if (MenuGrid.FindName("ExitBtn") is Button exitBtn)
-            {
-                // Удаляем предыдущие подписки, чтобы избежать дублирования
-                exitBtn.Click -= ExitBtn_Click; // Отписываемся на случай множественных подписок
-                exitBtn.Click += ExitBtn_Click;
-                System.Diagnostics.Debug.WriteLine("ExitBtn subscribed to Click event.");
-            }
 
             // Проверка автоматической авторизации
             try
@@ -197,31 +182,6 @@ namespace HospitalApp
 
                 System.Diagnostics.Debug.WriteLine("User logged out, credentials reset");
             }
-        }
-        private void BurgerButton_Click(object sender, RoutedEventArgs e)
-        {
-            _isMenuCollapsed = !_isMenuCollapsed;
-
-            if (_isMenuCollapsed)
-            {
-                // Скрываем меню
-                MenuColumn.Width = new GridLength(0);
-                MenuGrid.Visibility = Visibility.Collapsed;
-                MainFrame.SetValue(Grid.ColumnSpanProperty, 2);
-
-            }
-            else
-            {
-                // Показываем меню
-                MenuColumn.Width = new GridLength(120);
-                MenuGrid.Visibility = Visibility.Visible;
-                MainFrame.SetValue(Grid.ColumnSpanProperty, 1);
-
-            }
-
-            // Принудительное обновление layout
-            this.InvalidateVisual();
-            this.UpdateLayout();
         }
     }
 }

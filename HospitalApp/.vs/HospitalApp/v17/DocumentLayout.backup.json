@@ -3,164 +3,130 @@
   "WorkspaceRootPath": "D:\\Practics\\HospitalApp\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\mainpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\mainpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\editwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\editwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\mainpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\mainpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\editwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\editwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\exportexcel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\exportexcel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\exportword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\exportword.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\pages\\mainpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\pages\\mainpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\hospitalmodel.context.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\hospitalmodel.context.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\pages\\mainpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\pages\\mainpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\authorizepage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\authorizepage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kolya\\AppData\\Local\\Temp\\.vsdbgsrc\\3714f74b82eacc6cf8dcf1e32980b0908d4f8b447d25d4eb08ff1424a7b57c02\\ResourcePart.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|d:\\practics\\hospitalapp\\hospitalapp\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{FD841FC3-EF5A-42AB-AC30-F1F8F3850185}|HospitalApp\\HospitalApp.csproj|solutionrelative:hospitalapp\\app.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
     }
   ],
   "DocumentGroupContainers": [
     {
-      "Orientation": 0,
+      "Orientation": 1,
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "DockedHeight": 200,
+          "SelectedChildIndex": 7,
           "Children": [
             {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "EditWindow.xaml.cs",
-              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\EditWindow.xaml.cs",
-              "RelativeDocumentMoniker": "HospitalApp\\EditWindow.xaml.cs",
-              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\EditWindow.xaml.cs",
-              "RelativeToolTip": "HospitalApp\\EditWindow.xaml.cs",
-              "ViewState": "AgIAAD0BAAAAAAAAAAAqwG0BAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-18T14:54:02.56Z",
-              "EditorCaption": ""
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d78612c7-9962-4b83-95d9-268046dad23a}"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
-              "Title": "EditWindow.xaml",
-              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\EditWindow.xaml",
-              "RelativeDocumentMoniker": "HospitalApp\\EditWindow.xaml",
-              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\EditWindow.xaml",
-              "RelativeToolTip": "HospitalApp\\EditWindow.xaml",
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "HospitalApp\\MainWindow.xaml",
+              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\MainWindow.xaml",
+              "RelativeToolTip": "HospitalApp\\MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-05-18T14:58:29.859Z",
+              "WhenOpened": "2025-05-21T08:30:33.976Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ExportWord.cs",
-              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\ExportWord.cs",
-              "RelativeDocumentMoniker": "HospitalApp\\ExportWord.cs",
-              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\ExportWord.cs",
-              "RelativeToolTip": "HospitalApp\\ExportWord.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAJQBAAABAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "HospitalApp\\MainWindow.xaml.cs",
+              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\MainWindow.xaml.cs",
+              "RelativeToolTip": "HospitalApp\\MainWindow.xaml.cs",
+              "ViewState": "AgIAAB8AAAAAAAAAAAAEwCgAAAAvAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-18T14:56:18.544Z",
+              "WhenOpened": "2025-05-21T08:30:31.076Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "ExportExcel.cs",
-              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\ExportExcel.cs",
-              "RelativeDocumentMoniker": "HospitalApp\\ExportExcel.cs",
-              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\ExportExcel.cs",
-              "RelativeToolTip": "HospitalApp\\ExportExcel.cs",
-              "ViewState": "AgIAAJQAAAAAAAAAAAAAAMQAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-18T14:56:12.342Z",
+              "DocumentIndex": 6,
+              "Title": "App.config",
+              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\App.config",
+              "RelativeDocumentMoniker": "HospitalApp\\App.config",
+              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\App.config",
+              "RelativeToolTip": "HospitalApp\\App.config",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
+              "WhenOpened": "2025-05-21T08:26:52.925Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "MainPage.xaml",
-              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\MainPage.xaml",
-              "RelativeDocumentMoniker": "HospitalApp\\MainPage.xaml",
-              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\MainPage.xaml",
-              "RelativeToolTip": "HospitalApp\\MainPage.xaml",
+              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\Pages\\MainPage.xaml",
+              "RelativeDocumentMoniker": "HospitalApp\\Pages\\MainPage.xaml",
+              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\Pages\\MainPage.xaml*",
+              "RelativeToolTip": "HospitalApp\\Pages\\MainPage.xaml*",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-05-18T13:42:23.958Z",
+              "WhenOpened": "2025-05-21T08:26:26.426Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "HospitalApp\\MainWindow.xaml.cs",
-              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\MainWindow.xaml.cs",
-              "RelativeToolTip": "HospitalApp\\MainWindow.xaml.cs",
-              "ViewState": "AgIAAJQAAAAAAAAAAAAowLAAAAAJAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-18T13:36:58.572Z",
+              "DocumentIndex": 4,
+              "Title": "App.xaml",
+              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\App.xaml",
+              "RelativeDocumentMoniker": "HospitalApp\\App.xaml",
+              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\App.xaml",
+              "RelativeToolTip": "HospitalApp\\App.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-05-21T08:25:33.33Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "ResourcePart.cs",
+              "DocumentMoniker": "C:\\Users\\kolya\\AppData\\Local\\Temp\\.vsdbgsrc\\3714f74b82eacc6cf8dcf1e32980b0908d4f8b447d25d4eb08ff1424a7b57c02\\ResourcePart.cs",
+              "ToolTip": "C:\\Users\\kolya\\AppData\\Local\\Temp\\.vsdbgsrc\\3714f74b82eacc6cf8dcf1e32980b0908d4f8b447d25d4eb08ff1424a7b57c02\\ResourcePart.cs [\u0422\u043E\u043B\u044C\u043A\u043E \u0447\u0442\u0435\u043D\u0438\u0435]",
+              "ViewState": "AgIAACEAAAAAAAAAAAArwCsAAAAEAAAAAQAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-21T08:24:56.152Z",
+              "EditorCaption": " [\u0422\u043E\u043B\u044C\u043A\u043E \u0447\u0442\u0435\u043D\u0438\u0435]"
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "MainPage.xaml.cs",
-              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\MainPage.xaml.cs",
-              "RelativeDocumentMoniker": "HospitalApp\\MainPage.xaml.cs",
-              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\MainPage.xaml.cs",
-              "RelativeToolTip": "HospitalApp\\MainPage.xaml.cs",
-              "ViewState": "AgIAAJUCAAAAAAAAAADwv8ICAAABAAAAAAAAAA==",
+              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\Pages\\MainPage.xaml.cs",
+              "RelativeDocumentMoniker": "HospitalApp\\Pages\\MainPage.xaml.cs",
+              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\Pages\\MainPage.xaml.cs",
+              "RelativeToolTip": "HospitalApp\\Pages\\MainPage.xaml.cs",
+              "ViewState": "AgIAAFgDAAAAAAAAAAAnwPQDAAAeAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-18T13:28:14.117Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "HospitalModel.Context.cs",
-              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\HospitalModel.Context.cs",
-              "RelativeDocumentMoniker": "HospitalApp\\HospitalModel.Context.cs",
-              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\HospitalModel.Context.cs",
-              "RelativeToolTip": "HospitalApp\\HospitalModel.Context.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAQAAAAjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-18T13:29:44.319Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "AuthorizePage.xaml.cs",
-              "DocumentMoniker": "D:\\Practics\\HospitalApp\\HospitalApp\\AuthorizePage.xaml.cs",
-              "RelativeDocumentMoniker": "HospitalApp\\AuthorizePage.xaml.cs",
-              "ToolTip": "D:\\Practics\\HospitalApp\\HospitalApp\\AuthorizePage.xaml.cs",
-              "RelativeToolTip": "HospitalApp\\AuthorizePage.xaml.cs",
-              "ViewState": "AgIAAB4CAAAAAAAAAADwv0cCAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-18T12:54:47.964Z",
+              "WhenOpened": "2025-05-21T08:19:23.349Z",
               "EditorCaption": ""
             }
           ]
