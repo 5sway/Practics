@@ -236,11 +236,11 @@ namespace HospitalApp
             ErrorText.VerticalAlignment = VerticalAlignment.Center;
             if (_viewModel.CaptchaVisibility == Visibility.Visible)
             {
-                ErrorText.Margin = new Thickness(0, 110, 140, 0);
+                ErrorText.Margin = new Thickness(0, 110, 0, 0);
             }
             else
             {
-                ErrorText.Margin = new Thickness(0, 180, 140, 0);
+                ErrorText.Margin = new Thickness(0, 180, 0, 0);
             }
 
             _errorTimer.Start();

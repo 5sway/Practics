@@ -1,9 +1,13 @@
-﻿using Microsoft.Win32;
+﻿using BarcodeStandard;
+using Microsoft.Win32;
+using SkiaSharp;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Entity;
 using System.Data.Entity.Validation;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -12,10 +16,6 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Diagnostics;
-using BarcodeStandard;
-using SkiaSharp;
-using System.Globalization;
 
 namespace HospitalApp
 {
@@ -44,15 +44,13 @@ namespace HospitalApp
         private List<Analyzer> _analyzers;
         private Visibility _adminButtonsVisibility = Visibility.Visible;
         private Service_Provided _selectedServiceProvided;
-        private DateTime? _selectedDateProvided;
+        private string _selectedOrderStatus;
         private Insurance_Company _selectedInsuranceCompany;
         private string _selectedInsuranceCompanyTitle;
         private decimal _billAmount;
+        private decimal _totalBillAmount;
         private List<User> _bills;
-        private Dictionary<int, DateTime?> _billDates = new Dictionary<int, DateTime?>();
         private bool _areTableCheckBoxesEnabled = true;
-        private List<Pacient> _availablePatients;
-        private Pacient _selectedPatient;
         private bool _isPatientsGridReadOnly = true;
         private bool _isOrdersGridReadOnly = true;
         private bool _isServicesGridReadOnly = true;
@@ -62,6 +60,7 @@ namespace HospitalApp
         private List<int?> _scannedBarcodes;
         private bool _isAdminTabSelected;
         private bool _isReportsTabSelected;
+        private DateTime? _analysisDate;
 
         public bool IsTableFormat
         {
@@ -74,13 +73,18 @@ namespace HospitalApp
             get => _selectedFormat == "Word" || _selectedFormat == "PDF";
         }
 
+        public DateTime? AnalysisDate
+        {
+            get => _analysisDate;
+            set { _analysisDate = value; OnPropertyChanged(nameof(AnalysisDate)); }
+        }
+
         public string SelectedFormat
         {
             get => _selectedFormat;
             set
             {
                 _selectedFormat = value;
-                // Устанавливаем IsTableFormat по умолчанию для Excel
                 if (value == "Excel")
                     IsTableFormat = false;
                 OnPropertyChanged(nameof(SelectedFormat));
@@ -253,10 +257,10 @@ namespace HospitalApp
             set { _selectedServiceProvided = value; OnPropertyChanged(nameof(SelectedServiceProvided)); }
         }
 
-        public DateTime? SelectedDateProvided
+        public string SelectedOrderStatus
         {
-            get => _selectedDateProvided;
-            set { _selectedDateProvided = value; OnPropertyChanged(nameof(SelectedDateProvided)); }
+            get => _selectedOrderStatus;
+            set { _selectedOrderStatus = value; OnPropertyChanged(nameof(SelectedOrderStatus)); }
         }
 
         public Insurance_Company SelectedInsuranceCompany
@@ -266,8 +270,7 @@ namespace HospitalApp
             {
                 _selectedInsuranceCompany = value;
                 SelectedInsuranceCompanyTitle = value?.Title;
-                LoadAvailablePatients();
-                PatientsComboBox.IsEnabled = value != null;
+                InsuranceCompanyTextBox.IsEnabled = value != null;
                 OnPropertyChanged(nameof(SelectedInsuranceCompany));
             }
         }
@@ -284,22 +287,16 @@ namespace HospitalApp
             set { _billAmount = value; OnPropertyChanged(nameof(BillAmount)); }
         }
 
+        public decimal TotalBillAmount
+        {
+            get => _totalBillAmount;
+            set { _totalBillAmount = value; OnPropertyChanged(nameof(TotalBillAmount)); }
+        }
+
         public List<User> Bills
         {
             get => _bills;
             set { _bills = value; OnPropertyChanged(nameof(Bills)); }
-        }
-
-        public List<Pacient> AvailablePatients
-        {
-            get => _availablePatients;
-            set { _availablePatients = value; OnPropertyChanged(nameof(AvailablePatients)); }
-        }
-
-        public Pacient SelectedPatient
-        {
-            get => _selectedPatient;
-            set { _selectedPatient = value; OnPropertyChanged(nameof(SelectedPatient)); }
         }
 
         public bool IsPatientsGridReadOnly
@@ -338,7 +335,7 @@ namespace HospitalApp
             set { _isReportsTabSelected = value; OnPropertyChanged(nameof(IsReportsTabSelected)); }
         }
 
-        public List<string> StatusOptions { get; } = new List<string> { "В работе", "Готово" };
+        public List<string> StatusOptions { get; } = new List<string> { "В работе", "Выполнен" };
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -354,6 +351,10 @@ namespace HospitalApp
             _scannedBarcodes = new List<int?>();
             DataContext = this;
             SetupUIForRole();
+
+            OrdersGrid.ItemsSource = new List<Order>();
+            PatientsGrid.ItemsSource = new List<Pacient>();
+
             if (_currentRole == "Лаборант")
             {
                 BarcodeInput.Text = "";
@@ -385,6 +386,8 @@ namespace HospitalApp
                     LabTab.Visibility = Visibility.Visible;
                     MainTabControl.SelectedItem = LabTab;
                     UpdateSuggestedBarcode();
+                    UpdateLabTables();
+                    BarcodeInput.Text = "";
                     break;
                 case "Лаборант-Исследователь":
                     ResearcherTab.Visibility = Visibility.Visible;
@@ -443,9 +446,17 @@ namespace HospitalApp
                 if (roleColumn != null)
                     roleColumn.ItemsSource = roles;
 
-                var insuranceColumn = UsersGrid.Columns.FirstOrDefault(c => c.Header.ToString() == "Страх. компания") as DataGridComboBoxColumn;
+                var insuranceColumn = AdminPatientsGrid.Columns.FirstOrDefault(c => c.Header.ToString() == "Страховая компания") as DataGridComboBoxColumn;
                 if (insuranceColumn != null)
                     insuranceColumn.ItemsSource = insuranceCompanies;
+
+                var userInsuranceColumn = UsersGrid.Columns.FirstOrDefault(c => c.Header.ToString() == "Страховая компания") as DataGridComboBoxColumn;
+                if (userInsuranceColumn != null)
+                    userInsuranceColumn.ItemsSource = insuranceCompanies;
+
+                var userServiceColumn = UsersGrid.Columns.FirstOrDefault(c => c.Header.ToString() == "Услуга") as DataGridComboBoxColumn;
+                if (userServiceColumn != null)
+                    userServiceColumn.ItemsSource = services;
 
                 var statusColumn = AdminOrdersGrid.Columns.FirstOrDefault(c => c.Header.ToString() == "Статус") as DataGridComboBoxColumn;
                 if (statusColumn != null)
@@ -455,17 +466,28 @@ namespace HospitalApp
 
         private void BillsGrid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Delete && BillsGrid.SelectedItem is User selectedBill)
+            if (e.Key == Key.Delete && BillsGrid.SelectedItem != null)
             {
-                if (MessageBox.Show("Вы уверены, что хотите удалить этот счет?", "Подтверждение удаления", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                var selectedItemType = BillsGrid.SelectedItem.GetType();
+                var userProperty = selectedItemType.GetProperty("User");
+                var user = userProperty?.GetValue(BillsGrid.SelectedItem) as User;
+
+                if (user == null)
+                    return;
+
+                if (MessageBox.Show("Вы уверены, что хотите удалить этот счет?", "Подтверждение удаления",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     using (var context = new HospitalBaseEntities())
                     {
-                        var billToDelete = context.User.FirstOrDefault(u => u.User_Id == selectedBill.User_Id);
-                        if (billToDelete != null)
+                        var userToUpdate = context.User.FirstOrDefault(u => u.User_Id == user.User_Id);
+                        if (userToUpdate != null)
                         {
-                            context.User.Remove(billToDelete);
+                            var deletedAmount = userToUpdate.Account ?? 0;
+                            userToUpdate.Insurance_Company_Id = null;
+                            userToUpdate.Account = null;
                             context.SaveChanges();
+                            TotalBillAmount -= deletedAmount; // Subtract deleted amount from total
                             LoadBills();
                         }
                     }
@@ -478,34 +500,44 @@ namespace HospitalApp
         {
             if (e.Key == Key.Delete && sender is DataGrid grid && grid.SelectedItem != null)
             {
-                if (MessageBox.Show("Вы уверены, что хотите удалить эту запись?", "Подтверждение удаления", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (MessageBox.Show("Удалить запись из таблицы?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
-                    using (var context = new HospitalBaseEntities())
+                    if (grid == PatientsGrid)
                     {
-                        try
+                        var patient = grid.SelectedItem as Pacient;
+                        var ordersToRemove = (OrdersGrid.ItemsSource as IList)?.Cast<Order>()
+                            .Where(o => o.Pacient_Id == patient.Pacient_Id).ToList();
+
+                        if (ordersToRemove != null)
                         {
-                            if (grid == PatientsGrid)
+                            foreach (var order in ordersToRemove)
                             {
-                                var patient = grid.SelectedItem as Pacient;
-                                var dbPatient = context.Pacient.FirstOrDefault(p => p.Pacient_Id == patient.Pacient_Id);
-                                if (dbPatient != null)
-                                    context.Pacient.Remove(dbPatient);
+                                (OrdersGrid.ItemsSource as IList)?.Remove(order);
+                                _scannedBarcodes.Remove(order.BarCode);
                             }
-                            else if (grid == OrdersGrid)
-                            {
-                                var order = grid.SelectedItem as Order;
-                                var dbOrder = context.Order.FirstOrDefault(o => o.Order_Id == order.Order_Id);
-                                if (dbOrder != null)
-                                    context.Order.Remove(dbOrder);
-                            }
-                            context.SaveChanges();
-                            UpdateLabTables();
                         }
-                        catch (Exception ex)
+                        (PatientsGrid.ItemsSource as IList)?.Remove(patient);
+                    }
+                    else if (grid == OrdersGrid)
+                    {
+                        var order = grid.SelectedItem as Order;
+                        _scannedBarcodes.Remove(order.BarCode);
+                        (OrdersGrid.ItemsSource as IList)?.Remove(order);
+
+                        var patientOrders = (OrdersGrid.ItemsSource as IList)?.Cast<Order>()
+                            .Where(o => o.Pacient_Id == order.Pacient_Id).ToList();
+
+                        if (patientOrders == null || !patientOrders.Any())
                         {
-                            MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                            var patientToRemove = (PatientsGrid.ItemsSource as IList)?.Cast<Pacient>()
+                                .FirstOrDefault(p => p.Pacient_Id == order.Pacient_Id);
+                            if (patientToRemove != null)
+                                (PatientsGrid.ItemsSource as IList)?.Remove(patientToRemove);
                         }
                     }
+
+                    OrdersGrid.ItemsSource = OrdersGrid.ItemsSource;
+                    PatientsGrid.ItemsSource = PatientsGrid.ItemsSource;
                 }
                 e.Handled = true;
             }
@@ -513,9 +545,10 @@ namespace HospitalApp
 
         private void DataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Delete && sender is DataGrid grid && grid.SelectedItem != null)
+            if (e.Key == Key.Delete && sender is DataGrid grid && grid.SelectedItem != null &&
+                (_currentRole == "Лаборант-Администратор" || _currentRole == "Бухгалтер"))
             {
-                if (MessageBox.Show("Вы уверены, что хотите удалить эту запись?", "Подтверждение удаления", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                if (MessageBox.Show("Вы уверены, что хотите удалить эту запись из базы данных?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
                 {
                     using (var context = new HospitalBaseEntities())
                     {
@@ -551,7 +584,6 @@ namespace HospitalApp
                             }
                             context.SaveChanges();
                             LoadAdminData();
-                            ResetEditMode();
                         }
                         catch (Exception ex)
                         {
@@ -616,32 +648,30 @@ namespace HospitalApp
 
                 if (ordersWithoutBarcode.Any())
                 {
+                    var existingBarcodes = context.Order
+                        .Where(o => o.BarCode.HasValue)
+                        .Select(o => o.BarCode.Value)
+                        .ToList();
+
                     foreach (var order in ordersWithoutBarcode)
                     {
                         try
                         {
-                            int newId = context.Order.Any() ? context.Order.Max(o => o.Order_Id) + 1 : 1;
-                            string barcodeString = newId.ToString();
-                            int barcodeValue;
+                            int newBarcode;
+                            do
+                            {
+                                newBarcode = _random.Next(100000, 999999);
+                            }
+                            while (existingBarcodes.Contains(newBarcode));
 
-                            while (context.Order.Any(o => o.BarCode == newId))
-                            {
-                                newId++;
-                                barcodeString = newId.ToString();
-                            }
+                            order.BarCode = newBarcode;
+                            order.Order_Status = false;
+                            order.Create_Date = DateTime.Now;
 
-                            if (int.TryParse(barcodeString, out barcodeValue))
-                            {
-                                order.BarCode = barcodeValue;
-                                string outputPath = Path.Combine("Barcodes", $"Barcode_{order.BarCode}.png");
-                                Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
-                                GenerateBarcode(barcodeString, outputPath);
-                                Debug.WriteLine($"Штрих-код сгенерирован: {outputPath}, код: {barcodeString}");
-                            }
-                            else
-                            {
-                                Debug.WriteLine($"Ошибка: Невозможно преобразовать штрих-код в число: {barcodeString}");
-                            }
+                            string outputPath = Path.Combine("Barcodes", $"Barcode_{order.BarCode}.png");
+                            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+                            GenerateBarcode(newBarcode.ToString(), outputPath);
+                            Debug.WriteLine($"Штрих-код сгенерирован: {outputPath}, код: {newBarcode}");
                         }
                         catch (Exception ex)
                         {
@@ -667,7 +697,7 @@ namespace HospitalApp
                 using (var image = barcode.Encode(BarcodeStandard.Type.Code128, barcodeText))
                 using (var bitmap = SKBitmap.FromImage(image))
                 using (var data = bitmap.Encode(SKEncodedImageFormat.Png, 100))
-                using (var stream = new FileStream(outputPath, FileMode.Create))
+                using (var stream = new FileStream(outputPath, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     data.SaveTo(stream);
                 }
@@ -704,10 +734,32 @@ namespace HospitalApp
                 var serviceProvided = context.Service_Provided
                     .Include(sp => sp.Service)
                     .Include(sp => sp.User)
-                    .Include(sp => sp.Analyzer)
                     .Where(sp => sp.Service_Id != 0 && sp.User_Id != 0)
                     .ToList();
-                ServiceProvidedGrid.ItemsSource = serviceProvided;
+
+                var orders = context.Order
+                    .Include(o => o.Pacient)
+                    .Include(o => o.Service)
+                    .Where(o => o.Pacient_Id != 0 && o.Service_Id != 0)
+                    .ToList();
+
+                var displayList = new List<dynamic>();
+                foreach (var sp in serviceProvided)
+                {
+                    var order = orders.FirstOrDefault(o => o.Service_Id == sp.Service_Id);
+                    displayList.Add(new
+                    {
+                        ServiceProvided = sp,
+                        Order = order,
+                        Pacient = order?.Pacient,
+                        Service = sp.Service,
+                        User = sp.User,
+                        OrderStatus = order?.Order_Status == true ? "Выполнен" : "В работе",
+                        CompleteTime = order?.Complete_Time
+                    });
+                }
+
+                ServiceProvidedGrid.ItemsSource = displayList;
             }
         }
 
@@ -732,6 +784,7 @@ namespace HospitalApp
 
                 UsersGrid.ItemsSource = context.User
                     .Include(u => u.Role)
+                    .Include(u => u.Service)
                     .Include(u => u.Insurance_Company)
                     .Where(u => u.Full_Name != null && u.Full_Name.Trim() != "")
                     .ToList();
@@ -748,34 +801,100 @@ namespace HospitalApp
             }
         }
 
+        private void IssueBillButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedInsuranceCompany == null)
+            {
+                MessageBox.Show("Выберите страховую компанию!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (BillAmount <= 0)
+            {
+                MessageBox.Show("Введите корректную сумму счета!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            using (var context = new HospitalBaseEntities())
+            {
+                try
+                {
+                    var currentUser = context.User
+                        .Include(u => u.Service)
+                        .FirstOrDefault(u => u.User_Id == UserData.CurrentUserId);
+
+                    if (currentUser == null)
+                    {
+                        MessageBox.Show("Не удалось идентифицировать текущего пользователя!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    if (BillsGrid.SelectedItem != null)
+                    {
+                        var selectedItem = BillsGrid.SelectedItem;
+                        var userProperty = selectedItem.GetType().GetProperty("User");
+                        var user = userProperty?.GetValue(selectedItem) as User;
+
+                        if (user != null)
+                        {
+                            var userToUpdate = context.User.FirstOrDefault(u => u.User_Id == user.User_Id);
+                            if (userToUpdate != null)
+                            {
+                                var previousAmount = userToUpdate.Account ?? 0;
+                                userToUpdate.Account = BillAmount;
+                                userToUpdate.Insurance_Company_Id = SelectedInsuranceCompany.Insurance_Company_Id;
+                                context.SaveChanges();
+                                TotalBillAmount = TotalBillAmount - previousAmount + BillAmount;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        currentUser.Insurance_Company_Id = SelectedInsuranceCompany.Insurance_Company_Id;
+                        currentUser.Account = BillAmount;
+                        context.SaveChanges();
+                        TotalBillAmount += BillAmount;
+                    }
+
+                    LoadBills();
+
+                    ResetBillForm();
+
+                    MessageBox.Show("Счет успешно сохранен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при сохранении счета: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void ResetBillForm()
+        {
+            BillAmount = 0;
+            SelectedInsuranceCompany = null;
+            BillsGrid.SelectedItem = null;
+            InsuranceCompanyTextBox.IsEnabled = false;
+        }
+
         private void LoadBills()
         {
             using (var context = new HospitalBaseEntities())
             {
-                Bills = context.User
+                var billData = context.User
                     .Include(u => u.Insurance_Company)
                     .Where(u => u.Account.HasValue && u.Account > 0 && u.Insurance_Company_Id.HasValue)
+                    .ToList()
+                    .Select(u => new
+                    {
+                        User = u,
+                        Insurance_Company = u.Insurance_Company,
+                        Account = u.Account
+                    })
                     .ToList();
-                BillsGrid.ItemsSource = Bills;
-            }
-        }
 
-        private void LoadAvailablePatients()
-        {
-            using (var context = new HospitalBaseEntities())
-            {
-                if (SelectedInsuranceCompany != null)
-                {
-                    AvailablePatients = context.Pacient
-                        .Include(p => p.Insurance_Company)
-                        .Where(p => p.Insurance_Company_Id == SelectedInsuranceCompany.Insurance_Company_Id && p.Full_Name != null && p.Full_Name.Trim() != "")
-                        .ToList();
-                }
-                else
-                {
-                    AvailablePatients = new List<Pacient>();
-                }
-                SelectedPatient = null;
+                BillsGrid.ItemsSource = billData;
+                TotalBillAmount = billData.Sum(b => b.Account ?? 0);
             }
         }
 
@@ -790,73 +909,85 @@ namespace HospitalApp
         private void ScanButton_Click(object sender, RoutedEventArgs e)
         {
             string barcodeText = BarcodeInput.Text.Trim();
-            if (string.IsNullOrEmpty(barcodeText) || !int.TryParse(barcodeText, out int barcode))
+            if (string.IsNullOrEmpty(barcodeText))
             {
-                MessageBox.Show("Некорректный штрих-код!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Введите штрих-код!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!int.TryParse(barcodeText, out int barcode))
+            {
+                MessageBox.Show("Штрих-код должен быть числом!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                BarcodeInput.Text = "";
                 return;
             }
 
             using (var context = new HospitalBaseEntities())
             {
-                var orders = context.Order
+                var order = context.Order
                     .Include(o => o.Pacient)
                     .Include(o => o.Service)
-                    .Where(o => o.BarCode == barcode)
-                    .ToList();
+                    .FirstOrDefault(o => o.BarCode == barcode && o.Order_Status == false);
 
-                if (orders.Any())
+                if (order == null)
                 {
-                    if (!_scannedBarcodes.Contains(barcode))
-                    {
-                        _scannedBarcodes.Add(barcode);
-                    }
-                    UpdateLabTables();
+                    MessageBox.Show("Заказ не найден или уже выполнен!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     BarcodeInput.Text = "";
-                    MessageBox.Show($"Штрих-код успешно отсканирован: {barcodeText}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
                 }
-                else
+
+                if (_scannedBarcodes.Contains(barcode))
                 {
-                    MessageBox.Show("Заказ с таким штрих-кодом не найден!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Этот штрих-код уже был отсканирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    BarcodeInput.Text = "";
+                    return;
                 }
+
+                _scannedBarcodes.Add(barcode);
+                UpdateLabTables();
+                BarcodeInput.Text = "";
+                MessageBox.Show($"Штрих-код {barcode} успешно отсканирован", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
         private void UpdateLabTables()
         {
+            if (_scannedBarcodes == null || !_scannedBarcodes.Any())
+            {
+                OrdersGrid.ItemsSource = new List<Order>();
+                PatientsGrid.ItemsSource = new List<Pacient>();
+                return;
+            }
+
             using (var context = new HospitalBaseEntities())
             {
                 var orders = context.Order
                     .Include(o => o.Pacient)
                     .Include(o => o.Service)
-                    .Where(o => _scannedBarcodes.Contains(o.BarCode))
+                    .Where(o => o.Order_Status == false &&
+                               o.BarCode.HasValue &&
+                               _scannedBarcodes.Contains(o.BarCode.Value))
                     .ToList();
 
-                var currentOrders = OrdersGrid.ItemsSource as List<Order> ?? new List<Order>();
-                var updatedOrders = currentOrders
-                    .Where(o => _scannedBarcodes.Contains(o.BarCode))
-                    .ToList();
-                updatedOrders.AddRange(orders.Where(o => !updatedOrders.Any(existing => existing.Order_Id == o.Order_Id)));
-
-                OrdersGrid.ItemsSource = updatedOrders;
-                PatientsGrid.ItemsSource = updatedOrders.Select(o => o.Pacient).Distinct().ToList();
-            }
-        }
-
-        private bool HasUnscannedBarcodes()
-        {
-            using (var context = new HospitalBaseEntities())
-            {
-                return context.Order
-                    .Any(o => o.BarCode.HasValue && !_scannedBarcodes.Contains(o.BarCode));
+                OrdersGrid.ItemsSource = orders;
+                PatientsGrid.ItemsSource = orders.Select(o => o.Pacient).Distinct().ToList();
             }
         }
 
         private void ReceiveButton_Click(object sender, RoutedEventArgs e)
         {
-            if (!HasUnscannedBarcodes())
+            using (var context = new HospitalBaseEntities())
             {
-                MessageBox.Show("Нет доступных штрих-кодов для сканирования!", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
+                var unscannedOrder = context.Order
+                    .Where(o => o.BarCode.HasValue && o.Order_Status == false && !_scannedBarcodes.Contains(o.BarCode.Value))
+                    .OrderBy(o => o.Order_Id)
+                    .FirstOrDefault();
+
+                if (unscannedOrder == null)
+                {
+                    MessageBox.Show("Нет доступных штрих-кодов для сканирования!", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
             }
 
             var receiveWindow = new Window
@@ -864,7 +995,7 @@ namespace HospitalApp
                 Title = "Получение биоматериалов",
                 MinWidth = 300,
                 MaxWidth = 400,
-                MinHeight = 200,
+                MinHeight = 250,
                 MaxHeight = 300,
                 WindowStartupLocation = WindowStartupLocation.CenterOwner,
                 Owner = Window.GetWindow(this)
@@ -897,83 +1028,93 @@ namespace HospitalApp
             stackPanel.Children.Add(barcodeImage);
             receiveWindow.Content = stackPanel;
 
-            string barcodeString = "";
+            string tempImagePath = Path.Combine(Path.GetTempPath(), $"temp_barcode_{Guid.NewGuid()}.png");
+
             try
             {
                 using (var context = new HospitalBaseEntities())
                 {
                     var unscannedOrder = context.Order
-                        .Where(o => o.BarCode.HasValue && !_scannedBarcodes.Contains(o.BarCode))
+                        .Where(o => o.BarCode.HasValue && o.Order_Status == false && !_scannedBarcodes.Contains(o.BarCode))
                         .OrderBy(o => o.Order_Id)
                         .FirstOrDefault();
 
-                    if (unscannedOrder != null)
+                    if (unscannedOrder == null)
                     {
-                        barcodeString = unscannedOrder.BarCode.ToString();
-                        string imagePath = Path.Combine("Barcodes", $"Barcode_{barcodeString}.png");
-                        Directory.CreateDirectory(Path.GetDirectoryName(imagePath));
-                        GenerateBarcode(barcodeString, imagePath);
-                        barcodeImage.Source = new BitmapImage(new Uri(imagePath, UriKind.RelativeOrAbsolute));
-                        Debug.WriteLine($"Штрих-код отображен из базы данных: {imagePath}, код: {barcodeString}");
+                        MessageBox.Show("Все штрих-коды уже отсканированы!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        receiveWindow.Close();
+                        return;
                     }
-                    else
+
+                    string barcodeString = unscannedOrder.BarCode.ToString();
+                    GenerateBarcode(barcodeString, tempImagePath);
+
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.UriSource = new Uri(tempImagePath);
+                    bitmap.EndInit();
+                    barcodeImage.Source = bitmap;
+
+                    File.Delete(tempImagePath);
+
+                    scanButton.Click += (s, args) =>
                     {
-                        Debug.WriteLine("Не найдено неотсканированных штрих-кодов в базе данных.");
-                        barcodeImage.Source = null;
-                    }
+                        string barcodeText = barcodeTextBox.Text.Trim();
+                        if (string.IsNullOrEmpty(barcodeText) || !int.TryParse(barcodeText, out int barcode))
+                        {
+                            MessageBox.Show("Некорректный штрих-код!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                            barcodeTextBox.Text = "";
+                            return;
+                        }
+
+                        using (var scanContext = new HospitalBaseEntities())
+                        {
+                            var order = scanContext.Order
+                                .FirstOrDefault(o => o.BarCode == barcode && o.Order_Status == false);
+
+                            if (order != null)
+                            {
+                                if (_scannedBarcodes.Contains(barcode))
+                                {
+                                    MessageBox.Show($"Штрих-код {barcodeText} уже был отсканирован!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                                    barcodeTextBox.Text = "";
+                                    return;
+                                }
+
+                                _scannedBarcodes.Add(barcode);
+                                order.Order_Status = false;
+                                scanContext.SaveChanges();
+                                UpdateLabTables();
+                                barcodeTextBox.Text = "";
+                                MessageBox.Show($"Штрих-код успешно отсканирован: {barcodeText}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                                receiveWindow.Close();
+                            }
+                            else
+                            {
+                                MessageBox.Show("Заказ с таким штрих-кодом не найден или уже завершен!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                                barcodeTextBox.Text = "";
+                            }
+                        }
+                    };
+
+                    barcodeTextBox.KeyDown += (s, args) =>
+                    {
+                        if (args.Key == Key.Enter)
+                        {
+                            scanButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+                        }
+                    };
                 }
+
+                receiveWindow.ShowDialog();
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"Ошибка при генерации штрих-кода: {ex.Message}");
                 MessageBox.Show($"Ошибка при генерации штрих-кода: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                try { if (File.Exists(tempImagePath)) File.Delete(tempImagePath); } catch { }
                 receiveWindow.Close();
-                return;
             }
-
-            scanButton.Click += (s, args) =>
-            {
-                string barcodeText = barcodeTextBox.Text.Trim();
-                if (string.IsNullOrEmpty(barcodeText) || !int.TryParse(barcodeText, out int barcode))
-                {
-                    MessageBox.Show("Некорректный штрих-код!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                using (var context = new HospitalBaseEntities())
-                {
-                    var orders = context.Order
-                        .Include(o => o.Pacient)
-                        .Include(o => o.Service)
-                        .Where(o => o.BarCode == barcode)
-                        .ToList();
-                    if (orders.Any())
-                    {
-                        if (!_scannedBarcodes.Contains(barcode))
-                        {
-                            _scannedBarcodes.Add(barcode);
-                        }
-                        UpdateLabTables();
-                        BarcodeInput.Text = "";
-                        MessageBox.Show($"Штрих-код успешно отсканирован: {barcodeText}", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                        receiveWindow.Close();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Заказ с таким штрих-кодом не найден!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            };
-
-            barcodeTextBox.KeyDown += (s, args) =>
-            {
-                if (args.Key == Key.Enter)
-                {
-                    scanButton.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
-                }
-            };
-
-            receiveWindow.ShowDialog();
         }
 
         private void DataGrid_MouseEnter(object sender, MouseEventArgs e)
@@ -990,6 +1131,9 @@ namespace HospitalApp
                         break;
                     case "Лаборант-Администратор":
                         AdminTabScrollViewer.CanContentScroll = false;
+                        break;
+                    case "Бухгалтер":
+                        // No scroll disabling for Accountant tab to ensure smooth interaction
                         break;
                 }
                 grid.Focus();
@@ -1011,21 +1155,26 @@ namespace HospitalApp
                     case "Лаборант-Администратор":
                         AdminTabScrollViewer.CanContentScroll = true;
                         break;
+                    case "Бухгалтер":
+                        // No scroll enabling needed
+                        break;
                 }
             }
         }
 
         private void ServiceProvidedGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (ServiceProvidedGrid.SelectedItem is Service_Provided selected)
+            if (ServiceProvidedGrid.SelectedItem != null)
             {
+                var selected = ServiceProvidedGrid.SelectedItem.GetType().GetProperty("ServiceProvided").GetValue(ServiceProvidedGrid.SelectedItem) as Service_Provided;
+                var order = ServiceProvidedGrid.SelectedItem.GetType().GetProperty("Order").GetValue(ServiceProvidedGrid.SelectedItem) as Order;
                 SelectedServiceProvided = selected;
-                SelectedDateProvided = selected.Date_Provided;
+                SelectedOrderStatus = order?.Order_Status == true ? "Выполнен" : "В работе";
             }
             else
             {
                 SelectedServiceProvided = null;
-                SelectedDateProvided = null;
+                SelectedOrderStatus = null;
             }
         }
 
@@ -1033,26 +1182,47 @@ namespace HospitalApp
         {
             if (SelectedServiceProvided == null)
             {
-                MessageBox.Show("Выберите запись для анализа!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Выберите запись для обновления статуса!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            if (SelectedDateProvided == null)
+            if (string.IsNullOrEmpty(SelectedOrderStatus))
             {
-                MessageBox.Show("Выберите дату предоставления!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Выберите статус!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (AnalysisDate == null)
+            {
+                MessageBox.Show("Укажите дату анализа!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
             using (var context = new HospitalBaseEntities())
             {
-                var serviceProvided = context.Service_Provided
-                    .FirstOrDefault(sp => sp.Service_Provided_Id == SelectedServiceProvided.Service_Provided_Id);
-                if (serviceProvided != null)
+                var order = context.Order
+                    .FirstOrDefault(o => o.Service_Id == SelectedServiceProvided.Service_Id);
+                if (order != null)
                 {
-                    serviceProvided.Date_Provided = SelectedDateProvided;
-                    context.SaveChanges();
-                    LoadServiceProvidedData();
-                    MessageBox.Show("Дата успешно обновлена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    bool newStatus = SelectedOrderStatus == "Выполнен";
+                    if (order.Order_Status != newStatus)
+                    {
+                        order.Order_Status = newStatus;
+                        order.Complete_Time = AnalysisDate;
+                        context.SaveChanges();
+                        LoadServiceProvidedData();
+                        if (_currentRole == "Лаборант")
+                            UpdateLabTables();
+                        MessageBox.Show("Статус успешно обновлен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Статус не изменился.", "Информация", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Заказ не найден!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -1062,90 +1232,35 @@ namespace HospitalApp
             if (InsuranceCompaniesGrid.SelectedItem is Insurance_Company selected)
             {
                 SelectedInsuranceCompany = selected;
+                InsuranceCompanyTextBox.Text = selected.Title;
                 InsuranceCompanyTextBox.IsEnabled = true;
-            }
-            else
-            {
-                SelectedInsuranceCompany = null;
-                InsuranceCompanyTextBox.IsEnabled = false;
-                PatientsComboBox.IsEnabled = false;
+                BillAmount = 0;
+                BillsGrid.SelectedItem = null;
             }
         }
 
-        private void IssueBillButton_Click(object sender, RoutedEventArgs e)
+        private void BillsGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (SelectedInsuranceCompany == null)
+            if (BillsGrid.SelectedItem != null)
             {
-                MessageBox.Show("Выберите страховую компанию!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
+                var selectedItem = BillsGrid.SelectedItem;
+                var userProperty = selectedItem.GetType().GetProperty("User");
+                var user = userProperty?.GetValue(selectedItem) as User;
 
-            if (SelectedPatient == null)
-            {
-                MessageBox.Show("Выберите пациента!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            if (BillAmount <= 0)
-            {
-                MessageBox.Show("Введите корректную сумму счета!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            using (var context = new HospitalBaseEntities())
-            {
-                try
+                if (user != null)
                 {
-                    var user = context.User
-                        .FirstOrDefault(u => u.Insurance_Company_Id == SelectedInsuranceCompany.Insurance_Company_Id && u.Full_Name.Contains("Счет для"));
-
-                    if (user == null)
+                    using (var context = new HospitalBaseEntities())
                     {
-                        user = new User
+                        var fullUser = context.User
+                            .Include(u => u.Insurance_Company)
+                            .FirstOrDefault(u => u.User_Id == user.User_Id);
+
+                        if (fullUser != null)
                         {
-                            Full_Name = $"Счет для {SelectedInsuranceCompany.Title} (Пациент: {SelectedPatient.Full_Name})",
-                            Login = $"bill_{SelectedInsuranceCompany.Insurance_Company_Id}_{DateTime.Now.Ticks}",
-                            Insurance_Company_Id = SelectedInsuranceCompany.Insurance_Company_Id,
-                            Account = BillAmount,
-                            Role_Id = context.Role.FirstOrDefault(r => r.Name == "Бухгалтер")?.Role_Id ?? 1,
-                            Service_Id = context.Service.FirstOrDefault()?.Service_Id ?? 1,
-                            Last_Login_Date = DateTime.Now,
-                            Password = "default_password"
-                        };
-                        context.User.Add(user);
+                            SelectedInsuranceCompany = fullUser.Insurance_Company;
+                            BillAmount = fullUser.Account ?? 0;
+                        }
                     }
-                    else
-                    {
-                        user.Account = (user.Account ?? 0) + BillAmount;
-                    }
-
-                    context.SaveChanges();
-
-                    if (_billDates.ContainsKey(user.User_Id))
-                    {
-                        _billDates[user.User_Id] = null;
-                    }
-                    else
-                    {
-                        _billDates.Add(user.User_Id, null);
-                    }
-
-                    LoadBills();
-                    LoadAdminData();
-                    BillAmount = 0;
-                    SelectedPatient = null;
-                    MessageBox.Show("Счет успешно выставлен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (DbEntityValidationException ex)
-                {
-                    var errors = ex.EntityValidationErrors
-                        .SelectMany(x => x.ValidationErrors)
-                        .Select(x => $"{x.PropertyName}: {x.ErrorMessage}");
-                    MessageBox.Show($"Ошибка валидации: {string.Join("; ", errors)}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Ошибка при выставлении счета: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -1239,7 +1354,6 @@ namespace HospitalApp
                         {
                             ExportWord.GenerateWordReport(selectedTables, IsTableFormat, selectedRecordIds, StartDate, EndDate, SelectedFormat == "PDF", filePath);
                         }
-                        Process.Start(filePath);
                     }
                     catch (Exception ex)
                     {
@@ -1256,7 +1370,14 @@ namespace HospitalApp
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _selectedGrid = sender as DataGrid;
-            ResetEditMode();
+            if (_selectedGrid?.SelectedItem != null)
+            {
+                _editableItem = _selectedGrid.SelectedItem;
+            }
+            else
+            {
+                _editableItem = null;
+            }
         }
 
         private void AddButton_Click(object sender, RoutedEventArgs e)
@@ -1267,41 +1388,69 @@ namespace HospitalApp
                 return;
             }
 
-            using (var context = new HospitalBaseEntities())
+            try
             {
-                object newItem = null;
-                if (_selectedGrid == AdminPatientsGrid)
+                using (var context = new HospitalBaseEntities())
                 {
-                    newItem = new Pacient { Full_Name = "Новый пациент", Policy = "Не указано" };
-                    var patients = (AdminPatientsGrid.ItemsSource as List<Pacient>) ?? new List<Pacient>();
-                    patients.Add((Pacient)newItem);
-                    AdminPatientsGrid.ItemsSource = patients;
-                }
-                else if (_selectedGrid == AdminOrdersGrid)
-                {
-                    newItem = new Order { Create_Date = DateTime.Now, Order_Status = false, Pacient_Id = context.Pacient.FirstOrDefault()?.Pacient_Id ?? 0, Service_Id = context.Service.FirstOrDefault()?.Service_Id ?? 0 };
-                    var orders = (AdminOrdersGrid.ItemsSource as List<Order>) ?? new List<Order>();
-                    orders.Add((Order)newItem);
-                    AdminOrdersGrid.ItemsSource = orders;
-                }
-                else if (_selectedGrid == ServicesGrid)
-                {
-                    newItem = new Service { Title = "Новая услуга", Price = 0, Deadline = 1 };
-                    var services = (ServicesGrid.ItemsSource as List<Service>) ?? new List<Service>();
-                    services.Add((Service)newItem);
-                    ServicesGrid.ItemsSource = services;
-                }
-                else if (_selectedGrid == UsersGrid)
-                {
-                    newItem = new User { Full_Name = "Новый пользователь", Login = "new_user", Role_Id = context.Role.FirstOrDefault()?.Role_Id ?? 1 };
-                    var users = (UsersGrid.ItemsSource as List<User>) ?? new List<User>();
-                    users.Add((User)newItem);
-                    UsersGrid.ItemsSource = users;
-                }
+                    object newItem = null;
 
-                _editableItem = newItem;
-                SetGridEditMode(_selectedGrid, newItem);
-                _selectedGrid.ScrollIntoView(newItem);
+                    if (_selectedGrid == AdminPatientsGrid)
+                    {
+                        newItem = new Pacient
+                        {
+                            Full_Name = "Новый пациент",
+                            Policy = "Не указано",
+                            Birth_Date = DateTime.Now,
+                            Insurance_Company_Id = context.Insurance_Company.FirstOrDefault()?.Insurance_Company_Id ?? 1
+                        };
+                        context.Pacient.Add((Pacient)newItem);
+                    }
+                    else if (_selectedGrid == AdminOrdersGrid)
+                    {
+                        newItem = new Order
+                        {
+                            Create_Date = DateTime.Now,
+                            Order_Status = false,
+                            Pacient_Id = context.Pacient.FirstOrDefault()?.Pacient_Id ?? 0,
+                            Service_Id = context.Service.FirstOrDefault()?.Service_Id ?? 0
+                        };
+                        context.Order.Add((Order)newItem);
+                    }
+                    else if (_selectedGrid == ServicesGrid)
+                    {
+                        newItem = new Service { Title = "Новая услуга", Price = 0, Deadline = 1, Deviation = 0 };
+                        context.Service.Add((Service)newItem);
+                    }
+                    else if (_selectedGrid == UsersGrid)
+                    {
+                        newItem = new User
+                        {
+                            Full_Name = "Новый пользователь",
+                            Login = "new_user",
+                            Role_Id = context.Role.FirstOrDefault()?.Role_Id ?? 1,
+                            Service_Id = context.Service.FirstOrDefault()?.Service_Id ?? 1,
+                            Last_Login_Date = DateTime.Now,
+                            Password = "default_password"
+                        };
+                        context.User.Add((User)newItem);
+                    }
+
+                    context.SaveChanges();
+                    LoadAdminData();
+
+                    if (newItem != null)
+                    {
+                        _selectedGrid.ItemsSource = _selectedGrid.ItemsSource;
+                        _selectedGrid.ScrollIntoView(newItem);
+                        _selectedGrid.SelectedItem = newItem;
+                        _editableItem = newItem;
+                        SetGridEditMode(_selectedGrid, newItem);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при добавлении записи: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -1345,55 +1494,7 @@ namespace HospitalApp
                 {
                     try
                     {
-                        if (_selectedGrid == AdminPatientsGrid)
-                        {
-                            var patient = _editableItem as Pacient;
-                            if (context.Pacient.Any(p => p.Pacient_Id == patient.Pacient_Id))
-                            {
-                                context.Entry(patient).State = EntityState.Modified;
-                            }
-                            else
-                            {
-                                context.Pacient.Add(patient);
-                            }
-                        }
-                        else if (_selectedGrid == AdminOrdersGrid)
-                        {
-                            var order = _editableItem as Order;
-                            if (context.Order.Any(o => o.Order_Id == order.Order_Id))
-                            {
-                                context.Entry(order).State = EntityState.Modified;
-                            }
-                            else
-                            {
-                                context.Order.Add(order);
-                            }
-                        }
-                        else if (_selectedGrid == ServicesGrid)
-                        {
-                            var service = _editableItem as Service;
-                            if (context.Service.Any(s => s.Service_Id == service.Service_Id))
-                            {
-                                context.Entry(service).State = EntityState.Modified;
-                            }
-                            else
-                            {
-                                context.Service.Add(service);
-                            }
-                        }
-                        else if (_selectedGrid == UsersGrid)
-                        {
-                            var user = _editableItem as User;
-                            if (context.User.Any(u => u.User_Id == user.User_Id))
-                            {
-                                context.Entry(user).State = EntityState.Modified;
-                            }
-                            else
-                            {
-                                context.User.Add(user);
-                            }
-                        }
-
+                        context.Entry(_editableItem).State = EntityState.Modified;
                         context.SaveChanges();
                         LoadAdminData();
                         ResetEditMode();
@@ -1417,27 +1518,16 @@ namespace HospitalApp
 
         private void SetGridEditMode(DataGrid grid, object item)
         {
-            ResetEditMode();
             if (grid == AdminPatientsGrid)
-            {
                 IsPatientsGridReadOnly = false;
-                AdminPatientsGrid.SelectedItem = item;
-            }
             else if (grid == AdminOrdersGrid)
-            {
                 IsOrdersGridReadOnly = false;
-                AdminOrdersGrid.SelectedItem = item;
-            }
             else if (grid == ServicesGrid)
-            {
                 IsServicesGridReadOnly = false;
-                ServicesGrid.SelectedItem = item;
-            }
             else if (grid == UsersGrid)
-            {
                 IsUsersGridReadOnly = false;
-                UsersGrid.SelectedItem = item;
-            }
+
+            grid.BeginEdit();
         }
 
         private void ResetEditMode()
@@ -1447,6 +1537,7 @@ namespace HospitalApp
             IsServicesGridReadOnly = true;
             IsUsersGridReadOnly = true;
             _editableItem = null;
+            _selectedGrid = null;
         }
     }
 }

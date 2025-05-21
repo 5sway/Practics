@@ -7,26 +7,59 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d" Icon="/Resources/logo.ico" ShowInTaskbar="True"
         Title='АИС "№20"' FontFamily="Calibri" MinHeight="360" MinWidth="750" MaxHeight="500" MaxWidth="1000">
+    <Window.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#333"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style TargetType="Button" x:Key="TransparentButton">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Opacity" Value="0.8"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Opacity" Value="0.6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="44"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-
         <Grid Name="HeaderGrid" Grid.Row="0" Background="#6EDC82" Visibility="{Binding HeaderVisibility}">
-            <TextBlock Text='АИС Поликлиника "№20"' VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,0,250,0" FontSize="18"/>
-            <Image Source="/Resources/logo.png" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Column="0" Width="40" Margin="5,0,0,0" Panel.ZIndex="10"/>
-            <Border CornerRadius="12" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0" Background="#468C50" Width="160" Height="35" Grid.Row="0" Grid.Column="1">
+            <TextBlock Text='АИС Поликлиника "№20"' FontSize="18" Margin="0,0,250,0" HorizontalAlignment="Center"/>
+            <Image Source="/Resources/logo.png" VerticalAlignment="Center" HorizontalAlignment="Left" Width="40" Margin="5,0,0,0" Panel.ZIndex="10"/>
+            <Border Name="ProfileBorder" CornerRadius="12" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,10,0" Background="#468C50" Width="200" Height="35">
                 <Grid Name="ProfileGrid">
-                    <Button Name="ProfileBtn" VerticalAlignment="Center" HorizontalAlignment="Left" Width="30" Height="30" Margin="5,0,0,0" Background="Transparent" BorderThickness="0" Click="ProfileBtn_Click">
+                    <Button Name="ProfileBtn" Style="{StaticResource TransparentButton}" VerticalAlignment="Center" HorizontalAlignment="Left" Width="30" Height="30" Margin="5,0,0,0" Click="ProfileBtn_Click">
                         <Image Source="{Binding UserProfileIcon}" Stretch="Fill">
                             <Image.Clip>
                                 <EllipseGeometry Center="15,15" RadiusX="15" RadiusY="15"/>
                             </Image.Clip>
                         </Image>
                     </Button>
-                    <TextBlock Text="{Binding UserFullName}" Foreground="White" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="45,0,0,0" FontSize="12"/>
-                    <Button Name="ExitProfileBtn" FontSize="12" Width="25" Height="25" Content="Exit" VerticalAlignment="Center" HorizontalAlignment="Right" Background="Transparent" BorderThickness="0" Foreground="White" Margin="0,0,10,0" Click="ExitBtn_Click"/>
+                    <TextBlock Text="{Binding UserFullName}" Foreground="White" FontSize="12" Margin="45,0,0,0" HorizontalAlignment="Left"/>
+                    <Button Name="ExitProfileBtn" Style="{StaticResource TransparentButton}" Content="Выйти" Width="45" Height="25" HorizontalAlignment="Right" Margin="0,0,10,0" Click="ExitBtn_Click"/>
                 </Grid>
             </Border>
         </Grid>

@@ -226,7 +226,6 @@
       <DependentUpon>HospitalModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Classes\AuthorizePageViewModel.cs" />
-    <Compile Include="Classes\BarcodeGenerator.cs" />
     <Compile Include="Classes\BooleanToVisibilityConverter.cs" />
     <Compile Include="Classes\CaptchaGenerator.cs" />
     <Compile Include="Classes\ExportExcel.cs" />

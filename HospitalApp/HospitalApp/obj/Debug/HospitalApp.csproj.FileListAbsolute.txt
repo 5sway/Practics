@@ -117,3 +117,4 @@ D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp.exe
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp.pdb
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\MainWindow.g.cs
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\MainWindow.baml
+D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp.exe.config

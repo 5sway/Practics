@@ -6,9 +6,134 @@
       xmlns:local="clr-namespace:HospitalApp"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="ProfilePage">
+      Title="ProfilePage" FontFamily="Calibri" MinHeight="360">
+    <Page.Resources>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="#333"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="Margin" Value="5,5,0,0                                            "/>
+        </Style>
+        <Style TargetType="PasswordBox">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="5"/>
+            <Setter Property="Height" Value="30"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#CCCCCC"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="250"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#468C50"/>
+            <Setter Property="BorderBrush" Value="#3A7141"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Width" Value="150"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#3A7141"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#2E5632"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+    <Grid Background="#F5F5F5">
+        <Grid>
+            <TextBlock Text="Профиль" FontSize="24" Margin="0,20,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Black" />
+            <Button Content="Выход" Click="ExitButton_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" Width="80" Background="#DC3545">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Background" Value="#DC3545"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#C82333"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#B31B2B"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
+        <!-- Content Row -->
+        <Border Background="White" Margin="20,0,0,30" Padding="20" CornerRadius="5" BorderBrush="#CCCCCC" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="400" Height="300">
+            <Grid>
+                <!-- Full Name -->
+                <TextBlock Text="ФИО:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,10,0,0"/>
+                <TextBox VerticalAlignment="Top" Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}"/>
 
-    <Grid>
-        
+                <!-- Role (Read-Only) -->
+                <TextBlock Text="Роль:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,50,0,0"/>
+                <TextBlock VerticalAlignment="Top" Margin="55,50,0,0" Text="{Binding Role, Mode=OneWay}" FontWeight="SemiBold"/>
+
+                <!-- Login -->
+                <TextBlock Text="Логин:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,100,0,0"/>
+                <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Margin="5,95,0,0"/>
+
+                <!-- Password -->
+                <TextBlock Text="Пароль:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,150,0,0"/>
+                <TextBox Name="PswrdBox" VerticalAlignment="Top" Margin="5,145,0,0"/>
+
+                <!-- Current Time -->
+                <TextBlock Text="Текущее время:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,190,0,0"/>
+                <TextBlock x:Name="CurrentTimeText" Text="{Binding CurrentTime, Mode=OneWay, StringFormat='dd.MM.yyyy HH:mm:ss'}" FontWeight="SemiBold" VerticalAlignment="Top" Margin="110,190,0,0"/>
+
+                <!-- Uptime -->
+                <TextBlock Text="Время работы:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,225,0,0"/>
+                <TextBlock x:Name="UptimeText" Text="{Binding Uptime, Mode=OneWay}" FontWeight="SemiBold" VerticalAlignment="Top" Margin="110,225,0,0"/>
+            </Grid>
+        </Border>
+        <!-- Button Row -->
+        <Grid HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Content="Сохранить изменения" Click="SaveButton_Click" Height="25" Margin="5,0,165,35" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+            <Button Content="Назад" Click="BackButton_Click" Background="#DC3545" Height="25" Margin="185,0,0,35" VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+                        <Setter Property="Background" Value="#DC3545"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#C82333"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#B31B2B"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+        </Grid>
     </Grid>
 </Page>

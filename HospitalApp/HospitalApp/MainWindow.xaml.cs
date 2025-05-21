@@ -15,7 +15,7 @@ namespace HospitalApp
 {
     public partial class MainWindow : Window
     {
-        private readonly MainWindowViewModel _viewModel;
+        public readonly MainWindowViewModel _viewModel;
 
         public MainWindow()
         {
@@ -118,16 +118,24 @@ namespace HospitalApp
                 _viewModel.HeaderVisibility = Visibility.Hidden;
                 _viewModel.MenuVisibility = Visibility.Hidden;
             }
+            else if (e.Content is ProfilePage)
+            {
+                _viewModel.HeaderVisibility = Visibility.Visible;
+                ProfileBorder.Visibility = Visibility.Hidden;
+                _viewModel.MenuVisibility = Visibility.Visible;
+            }
             else
             {
                 _viewModel.HeaderVisibility = Visibility.Visible;
+                ProfileBorder.Visibility = Visibility.Visible;
                 _viewModel.MenuVisibility = Visibility.Visible;
             }
+
         }
 
         private void ProfileBtn_Click(object sender, RoutedEventArgs e)
         {
-            MainFrame.Navigate(new ProfilePage());
+            MainFrame.Navigate(new ProfilePage(UserData.CurrentUserId));
         }
 
         public void AuthorizeUser(User user)
