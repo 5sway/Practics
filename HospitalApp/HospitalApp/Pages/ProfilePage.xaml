@@ -97,10 +97,8 @@
         <Grid>
             <Button Content="Выход" Click="ExitButton_Click" Style="{StaticResource ExitButton}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0"/>
         </Grid>
-        <!-- Content Row -->
         <Border Background="White" Margin="20,0,0,30" Padding="20" CornerRadius="5" BorderBrush="#CCCCCC" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="400" Height="350">
             <Grid>
-                <!-- Profile Header -->
                 <Border CornerRadius="12" VerticalAlignment="Top" HorizontalAlignment="Left" Background="Transparent" Width="100" Height="50" Margin="10,0,0,10">
                     <Grid>
                         <Image Source="{Binding UserProfileIcon}" VerticalAlignment="Center" HorizontalAlignment="Left" Width="40" Height="40" Margin="5,0,0,0">
@@ -112,32 +110,20 @@
                     </Grid>
                 </Border>
                 <TextBlock Text="Профиль" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,0" FontSize="20" FontWeight="SemiBold"></TextBlock>
-                <!-- Full Name -->
                 <TextBlock Text="ФИО:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,60,0,0"/>
                 <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Margin="5,55,0,0"/>
-
-                <!-- Role (Read-Only) -->
                 <TextBlock Text="Роль:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,100,0,0"/>
                 <TextBlock Text="{Binding Role, Mode=OneWay}" FontWeight="SemiBold" VerticalAlignment="Top" Margin="55,100,0,0"/>
-
-                <!-- Login -->
                 <TextBlock Text="Логин:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,145,0,0"/>
                 <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Margin="5,140,0,0"/>
-
-                <!-- Password -->
                 <TextBlock Text="Пароль:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,190,0,0"/>
                 <TextBox x:Name="PswrdBox" VerticalAlignment="Top" Margin="5,185,0,0"/>
-
-                <!-- Current Time -->
                 <TextBlock Text="Текущее время:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,235,0,0"/>
                 <TextBlock x:Name="CurrentTimeText" Text="{Binding CurrentTime, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" VerticalAlignment="Top" Margin="110,235,0,0"/>
-
-                <!-- Uptime -->
                 <TextBlock Text="Время работы:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,270,0,0"/>
                 <TextBlock x:Name="UptimeText" Text="{Binding Uptime, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" VerticalAlignment="Top" Margin="110,270,0,0"/>
             </Grid>
         </Border>
-        <!-- Button Row -->
         <Grid HorizontalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>

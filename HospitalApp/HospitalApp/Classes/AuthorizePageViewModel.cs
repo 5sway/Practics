@@ -22,6 +22,7 @@ namespace HospitalApp
         private readonly TimeSpan _inputLockPeriod = TimeSpan.FromMinutes(10);
         private bool _isPasswordNotEmpty = false;
 
+        // Видимость полей ввода
         public Visibility InputVisibility
         {
             get => _inputVisibility;
@@ -32,6 +33,7 @@ namespace HospitalApp
             }
         }
 
+        // Видимость капчи
         public Visibility CaptchaVisibility
         {
             get => _captchaVisibility;
@@ -42,6 +44,7 @@ namespace HospitalApp
             }
         }
 
+        // Видимость сообщения об ошибке
         public Visibility ErrorVisibility
         {
             get => _errorVisibility;
@@ -52,6 +55,7 @@ namespace HospitalApp
             }
         }
 
+        // Текст сообщения об ошибке
         public string ErrorMessage
         {
             get => _errorMessage;
@@ -62,6 +66,7 @@ namespace HospitalApp
             }
         }
 
+        // Доступность полей ввода
         public bool IsInputEnabled
         {
             get => _isInputEnabled;
@@ -72,6 +77,7 @@ namespace HospitalApp
             }
         }
 
+        // Флаг наличия текста в поле пароля
         public bool IsPasswordNotEmpty
         {
             get => _isPasswordNotEmpty;
@@ -82,29 +88,37 @@ namespace HospitalApp
             }
         }
 
+        // Количество неудачных попыток входа (без уведомления)
         public int FailedAttempts
         {
             get => _failedAttempts;
             set => _failedAttempts = value;
         }
 
+        // Время до окончания "периода спокойствия" капчи (без уведомления)
         public DateTime? CaptchaGraceUntil
         {
             get => _captchaGraceUntil;
             set => _captchaGraceUntil = value;
         }
 
+        // Длительность "периода спокойствия" капчи (только чтение)
         public TimeSpan CaptchaGracePeriod => _captchaGracePeriod;
 
+        // Время до разблокировки ввода (без уведомления)
         public DateTime? InputLockUntil
         {
             get => _inputLockUntil;
             set => _inputLockUntil = value;
         }
 
+        // Длительность блокировки ввода (только чтение)
         public TimeSpan InputLockPeriod => _inputLockPeriod;
 
+        // Событие изменения свойства
         public event PropertyChangedEventHandler PropertyChanged;
+
+        // Метод для вызова события PropertyChanged
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

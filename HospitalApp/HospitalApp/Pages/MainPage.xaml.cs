@@ -10,6 +10,7 @@ using System.Data.Entity.Validation;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;  
 using System.Windows.Input;
@@ -62,19 +63,23 @@ namespace HospitalApp
         private bool _isReportsTabSelected;
         private DateTime? _analysisDate;
         private bool _isEditingOrAdding = false;
-        public List<string> StatusOptions { get; } = new List<string> { "В работе", "Выполнен" };
+        public static readonly List<string> PolicyTypes = new List<string> { "Standard", "Premium", "Basic" };
 
+        // Свойство для определения формата таблицы (табличный/текстовой)
         public bool IsTableFormat
         {
             get => _isTableFormat;
             set { _isTableFormat = value; OnPropertyChanged(nameof(IsTableFormat)); }
         }
 
+        // Свойство для определения видимости опции формата таблицы
+        // (доступно только для Word и PDF форматов)
         public bool IsTableFormatVisible
         {
             get => _selectedFormat == "Word" || _selectedFormat == "PDF";
         }
 
+        // Свойство для даты анализа с комбинированием выбранной даты и текущего времени
         public DateTime? AnalysisDate
         {
             get => _analysisDate;
@@ -82,7 +87,6 @@ namespace HospitalApp
             {
                 if (value.HasValue)
                 {
-                    // Combine the selected date with the current time
                     DateTime currentTime = DateTime.Now;
                     _analysisDate = new DateTime(
                         value.Value.Year,
@@ -100,6 +104,7 @@ namespace HospitalApp
             }
         }
 
+        // Свойство для выбранного формата отчета (Word/Excel/PDF)
         public string SelectedFormat
         {
             get => _selectedFormat;
@@ -113,6 +118,7 @@ namespace HospitalApp
             }
         }
 
+        // Свойство для выбора всех таблиц одновременно
         public bool AllTablesSelected
         {
             get => _allTablesSelected;
@@ -124,6 +130,7 @@ namespace HospitalApp
             }
         }
 
+        // Свойство для выбора таблицы пациентов
         public bool PatientsTableSelected
         {
             get => _patientsTableSelected;
@@ -135,6 +142,7 @@ namespace HospitalApp
             }
         }
 
+        // Свойство для выбора таблицы заказов
         public bool OrdersTableSelected
         {
             get => _ordersTableSelected;
@@ -146,6 +154,7 @@ namespace HospitalApp
             }
         }
 
+        // Свойство для выбора таблицы услуг
         public bool ServicesTableSelected
         {
             get => _servicesTableSelected;
@@ -157,6 +166,7 @@ namespace HospitalApp
             }
         }
 
+        // Свойство для выбора таблицы пользователей
         public bool UsersTableSelected
         {
             get => _usersTableSelected;
@@ -168,122 +178,143 @@ namespace HospitalApp
             }
         }
 
+        // Свойство для определения доступности чекбоксов таблиц
         public bool AreTableCheckBoxesEnabled
         {
             get => _areTableCheckBoxesEnabled;
             set { _areTableCheckBoxesEnabled = value; OnPropertyChanged(nameof(AreTableCheckBoxesEnabled)); }
         }
 
+        // Свойство для списка записей пациентов
         public List<Pacient> PatientRecords
         {
             get => _patientRecords;
             set { _patientRecords = value; OnPropertyChanged(nameof(PatientRecords)); }
         }
 
+        // Свойство для списка записей заказов
         public List<Order> OrderRecords
         {
             get => _orderRecords;
             set { _orderRecords = value; OnPropertyChanged(nameof(OrderRecords)); }
         }
 
+        // Свойство для списка записей услуг
         public List<Service> ServiceRecords
         {
             get => _serviceRecords;
             set { _serviceRecords = value; OnPropertyChanged(nameof(ServiceRecords)); }
         }
 
+        // Свойство для списка записей пользователей
         public List<User> UserRecords
         {
             get => _userRecords;
             set { _userRecords = value; OnPropertyChanged(nameof(UserRecords)); }
         }
 
+        // Свойство для выбранной записи пациента
         public Pacient SelectedPatientRecord
         {
             get => _selectedPatientRecord;
             set { _selectedPatientRecord = value; OnPropertyChanged(nameof(SelectedPatientRecord)); }
         }
 
+        // Свойство для выбранной записи заказа
         public Order SelectedOrderRecord
         {
             get => _selectedOrderRecord;
             set { _selectedOrderRecord = value; OnPropertyChanged(nameof(SelectedOrderRecord)); }
         }
 
+        // Свойство для выбранной записи услуги
         public Service SelectedServiceRecord
         {
             get => _selectedServiceRecord;
             set { _selectedServiceRecord = value; OnPropertyChanged(nameof(SelectedServiceRecord)); }
         }
 
+        // Свойство для выбранной записи пользователя
         public User SelectedUserRecord
         {
             get => _selectedUserRecord;
             set { _selectedUserRecord = value; OnPropertyChanged(nameof(SelectedUserRecord)); }
         }
 
+        // Свойство для начальной даты периода отчетов
         public DateTime StartDate
         {
             get => _startDate;
             set { _startDate = value; OnPropertyChanged(nameof(StartDate)); }
         }
 
+        // Свойство для конечной даты периода отчетов
         public DateTime EndDate
         {
             get => _endDate;
             set { _endDate = value; OnPropertyChanged(nameof(EndDate)); }
         }
 
+        // Свойство для предлагаемого штрих-кода
         public string SuggestedBarcode
         {
             get => _suggestedBarcode;
             set { _suggestedBarcode = value; OnPropertyChanged(nameof(SuggestedBarcode)); }
         }
 
+        // Свойство для списка анализаторов
         public List<Analyzer> Analyzers
         {
             get => _analyzers;
             set { _analyzers = value; OnPropertyChanged(nameof(Analyzers)); }
         }
 
+        // Свойство для видимости кнопок администратора
         public Visibility AdminButtonsVisibility
         {
             get => _adminButtonsVisibility;
             set { _adminButtonsVisibility = value; OnPropertyChanged(nameof(AdminButtonsVisibility)); }
         }
 
+        // Свойство для видимости комбобокса записей пациентов
         public Visibility PatientsRecordsComboVisible
         {
             get => (PatientsTableSelected && !AllTablesSelected) ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        // Свойство для видимости комбобокса записей заказов
         public Visibility OrdersRecordsComboVisible
         {
             get => (OrdersTableSelected && !AllTablesSelected) ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        // Свойство для видимости комбобокса записей услуг
         public Visibility ServicesRecordsComboVisible
         {
             get => (ServicesTableSelected && !AllTablesSelected) ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        // Свойство для видимости комбобокса записей пользователей
         public Visibility UsersRecordsComboVisible
         {
             get => (UsersTableSelected && !AllTablesSelected) ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        // Свойство для выбранной оказанной услуги
         public Service_Provided SelectedServiceProvided
         {
             get => _selectedServiceProvided;
             set { _selectedServiceProvided = value; OnPropertyChanged(nameof(SelectedServiceProvided)); }
         }
 
+        // Свойство для выбранного статуса заказа
         public string SelectedOrderStatus
         {
             get => _selectedOrderStatus;
             set { _selectedOrderStatus = value; OnPropertyChanged(nameof(SelectedOrderStatus)); }
         }
 
+        // Свойство для выбранной страховой компании
         public Insurance_Company SelectedInsuranceCompany
         {
             get => _selectedInsuranceCompany;
@@ -296,78 +327,94 @@ namespace HospitalApp
             }
         }
 
+        // Свойство для названия выбранной страховой компании
         public string SelectedInsuranceCompanyTitle
         {
             get => _selectedInsuranceCompanyTitle;
             set { _selectedInsuranceCompanyTitle = value; OnPropertyChanged(nameof(SelectedInsuranceCompanyTitle)); }
         }
 
+        // Свойство для суммы счета
         public decimal BillAmount
         {
             get => _billAmount;
             set { _billAmount = value; OnPropertyChanged(nameof(BillAmount)); }
         }
 
+        // Свойство для общей суммы счетов
         public decimal TotalBillAmount
         {
             get => _totalBillAmount;
             set { _totalBillAmount = value; OnPropertyChanged(nameof(TotalBillAmount)); }
         }
 
+        // Свойство для списка счетов
         public List<User> Bills
         {
             get => _bills;
             set { _bills = value; OnPropertyChanged(nameof(Bills)); }
         }
 
+        // Свойство для определения режима "только чтение" таблицы пациентов
         public bool IsPatientsGridReadOnly
         {
             get => _isPatientsGridReadOnly;
             set { _isPatientsGridReadOnly = value; OnPropertyChanged(nameof(IsPatientsGridReadOnly)); }
         }
 
+        // Свойство для определения режима "только чтение" таблицы заказов
         public bool IsOrdersGridReadOnly
         {
             get => _isOrdersGridReadOnly;
             set { _isOrdersGridReadOnly = value; OnPropertyChanged(nameof(IsOrdersGridReadOnly)); }
         }
 
+        // Свойство для определения режима "только чтение" таблицы услуг
         public bool IsServicesGridReadOnly
         {
             get => _isServicesGridReadOnly;
             set { _isServicesGridReadOnly = value; OnPropertyChanged(nameof(IsServicesGridReadOnly)); }
         }
 
+        // Свойство для определения режима "только чтение" таблицы пользователей
         public bool IsUsersGridReadOnly
         {
             get => _isUsersGridReadOnly;
             set { _isUsersGridReadOnly = value; OnPropertyChanged(nameof(IsUsersGridReadOnly)); }
         }
 
+        // Свойство для определения выбранной вкладки администратора
         public bool IsAdminTabSelected
         {
             get => _isAdminTabSelected;
             set { _isAdminTabSelected = value; OnPropertyChanged(nameof(IsAdminTabSelected)); }
         }
 
+        // Свойство для определения выбранной вкладки отчетов
         public bool IsReportsTabSelected
         {
             get => _isReportsTabSelected;
             set { _isReportsTabSelected = value; OnPropertyChanged(nameof(IsReportsTabSelected)); }
         }
 
+        // Событие изменения свойств (реализация INotifyPropertyChanged)
         public event PropertyChangedEventHandler PropertyChanged;
+
+        // Метод для вызова события изменения свойства
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        // Свойство для текста кнопки редактирования ("Изменить"/"Сохранить")
         public string EditButtonContent
         {
             get => _isEditingOrAdding ? "Сохранить" : "Изменить";
             set => OnPropertyChanged(nameof(EditButtonContent));
         }
 
+        // Конструктор главной страницы
+        // Инициализирует компоненты и настраивает интерфейс в зависимости от роли пользователя
         public MainPage(string role)
         {
             InitializeComponent();
@@ -395,6 +442,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для настройки интерфейса в зависимости от роли пользователя
         private void SetupUIForRole()
         {
             LabTab.Visibility = Visibility.Collapsed;
@@ -449,6 +497,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для настройки выпадающих списков в колонках DataGrid
         private void SetupComboBoxColumns()
         {
             using (var context = new HospitalBaseEntities())
@@ -484,6 +533,7 @@ namespace HospitalApp
             }
         }
 
+        // Обработчик нажатия клавиш в таблице счетов (удаление по Delete)
         private void BillsGrid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete && BillsGrid.SelectedItem != null)
@@ -507,7 +557,7 @@ namespace HospitalApp
                             userToUpdate.Insurance_Company_Id = null;
                             userToUpdate.Account = null;
                             context.SaveChanges();
-                            TotalBillAmount -= deletedAmount; // Subtract deleted amount from total
+                            TotalBillAmount -= deletedAmount;
                             LoadBills();
                         }
                     }
@@ -516,6 +566,7 @@ namespace HospitalApp
             }
         }
 
+        // Обработчик нажатия клавиш в таблицах лаборанта (удаление по Delete)
         private void LabDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete && sender is DataGrid grid && grid.SelectedItem != null)
@@ -563,16 +614,19 @@ namespace HospitalApp
             }
         }
 
+        // Обработчик события выбора всех таблиц
         private void AllTablesCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             UpdateIndividualCheckBoxes();
         }
 
+        // Обработчик события снятия выбора всех таблиц
         private void AllTablesCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             UpdateIndividualCheckBoxes();
         }
 
+        // Обработчик события снятия выбора отдельной таблицы
         private void TableCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!PatientsTableSelected || !OrdersTableSelected || !ServicesTableSelected || !UsersTableSelected)
@@ -581,6 +635,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обновления состояния чекбоксов отдельных таблиц
         private void UpdateIndividualCheckBoxes()
         {
             if (AllTablesSelected)
@@ -605,6 +660,7 @@ namespace HospitalApp
             OnPropertyChanged(nameof(UsersRecordsComboVisible));
         }
 
+        // Метод для генерации QR-кодов для новых заказов
         private void GenerateQRCodesForNewOrders()
         {
             using (var context = new HospitalBaseEntities())
@@ -651,6 +707,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для генерации штрих-кода в формате PNG
         private void GenerateBarcode(string barcodeText, string outputPath)
         {
             try
@@ -687,6 +744,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для загрузки анализаторов из базы данных
         private void LoadAnalyzers()
         {
             using (var context = new HospitalBaseEntities())
@@ -695,8 +753,9 @@ namespace HospitalApp
             }
         }
 
+        // Метод для загрузки данных об оказанных услугах
         private void LoadServiceProvidedData()
-        {
+                {
             using (var context = new HospitalBaseEntities())
             {
                 var serviceProvided = context.Service_Provided
@@ -731,6 +790,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для загрузки административных данных (пациенты, заказы, услуги, пользователи)
         private void LoadAdminData()
         {
             using (var context = new HospitalBaseEntities())
@@ -759,6 +819,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для загрузки данных для бухгалтера (страховые компании)
         private void LoadAccountantData()
         {
             using (var context = new HospitalBaseEntities())
@@ -769,6 +830,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки нажатия кнопки выставления счета
         private void IssueBillButton_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedInsuranceCompany == null)
@@ -845,6 +907,7 @@ namespace HospitalApp
             InsuranceCompanyTextBox.IsEnabled = false;
         }
 
+        // Метод для загрузки счетов из базы данных
         private void LoadBills()
         {
             using (var context = new HospitalBaseEntities())
@@ -866,6 +929,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки ввода штрих-кода
         private void BarcodeInput_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -874,6 +938,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки нажатия кнопки сканирования
         private void ScanButton_Click(object sender, RoutedEventArgs e)
         {
             string barcodeText = BarcodeInput.Text.Trim();
@@ -918,6 +983,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обновления таблиц лаборанта
         private void UpdateLabTables()
         {
             if (_scannedBarcodes == null || !_scannedBarcodes.Any())
@@ -942,6 +1008,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки нажатия кнопки получения биоматериалов
         private void ReceiveButton_Click(object sender, RoutedEventArgs e)
         {
             using (var context = new HospitalBaseEntities())
@@ -1085,6 +1152,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки изменения выбранной оказанной услуги
         private void ServiceProvidedGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ServiceProvidedGrid.SelectedItem != null)
@@ -1101,6 +1169,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки нажатия кнопки анализа
         private void AnalyzeButton_Click(object sender, RoutedEventArgs e)
         {
             if (SelectedServiceProvided == null)
@@ -1131,7 +1200,6 @@ namespace HospitalApp
                     if (order.Order_Status != newStatus)
                     {
                         order.Order_Status = newStatus;
-                        // Ensure Complete_Time has the current time
                         DateTime currentTime = DateTime.Now;
                         order.Complete_Time = new DateTime(
                             AnalysisDate.Value.Year,
@@ -1158,6 +1226,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки изменения выбранной страховой компании
         private void InsuranceCompaniesGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (InsuranceCompaniesGrid.SelectedItem is Insurance_Company selected)
@@ -1170,6 +1239,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки изменения выбранного счета
         private void BillsGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (BillsGrid.SelectedItem != null)
@@ -1196,6 +1266,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для загрузки записей отчетов
         private void LoadReportRecords()
         {
             using (var context = new HospitalBaseEntities())
@@ -1222,6 +1293,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки изменения формата отчета
         private void ReportFormatCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ReportFormatCombo.SelectedItem is ComboBoxItem selectedItem)
@@ -1230,6 +1302,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для генерации отчета
         private void GenerateReport_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -1298,6 +1371,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки нажатия кнопки удаления
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
             if (_selectedGrid == null || _selectedGrid.SelectedItem == null)
@@ -1333,7 +1407,7 @@ namespace HospitalApp
                         }
                         else if (selectedItem is Order order)
                         {
-                            if (order.Order_Id == 0) // Новая, несохраненная запись
+                            if (order.Order_Id == 0)
                             {
                                 ((IList)_selectedGrid.ItemsSource).Remove(selectedItem);
                             }
@@ -1349,7 +1423,7 @@ namespace HospitalApp
                         }
                         else if (selectedItem is Service service)
                         {
-                            if (service.Service_Id == 0) // Новая, несохраненная запись
+                            if (service.Service_Id == 0)
                             {
                                 ((IList)_selectedGrid.ItemsSource).Remove(selectedItem);
                             }
@@ -1365,7 +1439,7 @@ namespace HospitalApp
                         }
                         else if (selectedItem is User user)
                         {
-                            if (user.User_Id == 0) // Новая, несохраненная запись
+                            if (user.User_Id == 0)
                             {
                                 ((IList)_selectedGrid.ItemsSource).Remove(selectedItem);
                             }
@@ -1391,30 +1465,111 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки завершения редактирования ячейки DataGrid
         private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
             if (e.EditAction == DataGridEditAction.Commit && _editableItem != null)
             {
+                // Валидация полей
+                if (_editableItem is Pacient validatedPatient)
+                {
+                    if (!string.IsNullOrEmpty(validatedPatient.Policy) && !Regex.IsMatch(validatedPatient.Policy, @"^\d{1,10}$"))
+                    {
+                        MessageBox.Show("Полис должен содержать только цифры и быть не длиннее 10 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        e.Cancel = true;
+                        return;
+                    }
+                    if (!string.IsNullOrEmpty(validatedPatient.Phone_Number) && !Regex.IsMatch(validatedPatient.Phone_Number, @"^\d{1,10}$"))
+                    {
+                        MessageBox.Show("Телефон должен содержать только цифры и быть не длиннее 10 символов!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        e.Cancel = true;
+                        return;
+                    }
+                    if (!string.IsNullOrEmpty(validatedPatient.Policy_Type) && !MainPage.PolicyTypes.Contains(validatedPatient.Policy_Type))
+                    {
+                        MessageBox.Show("Тип полиса должен быть Standard, Premium или Basic!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+                else if (_editableItem is Service service)
+                {
+                    if (service.Deviation > 100m)
+                    {
+                        MessageBox.Show("Допуск не может превышать 100%!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        e.Cancel = true;
+                        return;
+                    }
+                }
+
                 using (var context = new HospitalBaseEntities())
                 {
                     try
                     {
-                        // Проверяем, что редактируемая запись существует в базе
-                        var entity = context.Entry(_editableItem);
-                        if (entity.State == EntityState.Detached)
+                        object entityToUpdate = null;
+                        if (_selectedGrid == AdminPatientsGrid)
                         {
-                            // Присоединяем объект к контексту
-                            if (_selectedGrid == AdminPatientsGrid)
-                                context.Pacient.Attach((Pacient)_editableItem);
-                            else if (_selectedGrid == AdminOrdersGrid)
-                                context.Order.Attach((Order)_editableItem);
-                            else if (_selectedGrid == ServicesGrid)
-                                context.Service.Attach((Service)_editableItem);
-                            else if (_selectedGrid == UsersGrid)
-                                context.User.Attach((User)_editableItem);
+                            var editedPatient = _editableItem as Pacient;
+                            entityToUpdate = context.Pacient.Find(editedPatient.Pacient_Id) ?? editedPatient;
+                            if (context.Entry(entityToUpdate).State == EntityState.Detached)
+                            {
+                                context.Pacient.Add((Pacient)entityToUpdate);
+                            }
+                            else
+                            {
+                                context.Entry(entityToUpdate).State = EntityState.Modified;
+                            }
+                            if (editedPatient.Insurance_Company_Id != 0)
+                            {
+                                var insuranceCompany = context.Insurance_Company.Local.FirstOrDefault(ic => ic.Insurance_Company_Id == editedPatient.Insurance_Company_Id);
+                                if (insuranceCompany == null)
+                                {
+                                    insuranceCompany = context.Insurance_Company.Find(editedPatient.Insurance_Company_Id);
+                                    if (insuranceCompany == null)
+                                    {
+                                        insuranceCompany = new Insurance_Company
+                                        {
+                                            Insurance_Company_Id = editedPatient.Insurance_Company_Id,
+                                            Title = "Новая страховая компания"
+                                        };
+                                        context.Insurance_Company.Add(insuranceCompany);
+                                    }
+                                }
+                            }
+                        }
+                        else if (_selectedGrid == AdminOrdersGrid)
+                        {
+                            var order = _editableItem as Order;
+                            entityToUpdate = context.Order.Find(order.Order_Id) ?? order;
+                            context.Order.Attach((Order)entityToUpdate);
+                            context.Entry(entityToUpdate).CurrentValues.SetValues(order);
+                        }
+                        else if (_selectedGrid == ServicesGrid)
+                        {
+                            var service = _editableItem as Service;
+                            entityToUpdate = context.Service.Find(service.Service_Id) ?? service;
+                            context.Service.Attach((Service)entityToUpdate);
+                            context.Entry(entityToUpdate).CurrentValues.SetValues(service);
+                        }
+                        else if (_selectedGrid == UsersGrid)
+                        {
+                            var user = _editableItem as User;
+                            entityToUpdate = context.User.Find(user.User_Id) ?? user;
+                            context.User.Attach((User)entityToUpdate);
+                            context.Entry(entityToUpdate).CurrentValues.SetValues(user);
                         }
 
-                        entity.State = EntityState.Modified;
+                        if (context.Entry(entityToUpdate).State == EntityState.Detached && _selectedGrid != AdminPatientsGrid)
+                        {
+                            if (_selectedGrid == AdminOrdersGrid) context.Order.Add((Order)entityToUpdate);
+                            else if (_selectedGrid == ServicesGrid) context.Service.Add((Service)entityToUpdate);
+                            else if (_selectedGrid == UsersGrid) context.User.Add((User)entityToUpdate);
+                        }
+                        else if (_selectedGrid != AdminPatientsGrid)
+                        {
+                            context.Entry(entityToUpdate).State = EntityState.Modified;
+                        }
+
                         context.SaveChanges();
                         LoadAdminData();
                         ResetEditMode();
@@ -1436,6 +1591,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для сброса режима редактирования
         private void ResetEditMode()
         {
             IsPatientsGridReadOnly = true;
@@ -1445,6 +1601,8 @@ namespace HospitalApp
             _editableItem = null;
             _selectedGrid = null;
         }
+
+        // Метод для обработки нажатия кнопки добавления
         private void AddButton_Click(object sender, RoutedEventArgs e)
         {
             if (_selectedGrid == null)
@@ -1471,6 +1629,7 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки нажатия кнопки редактирования
         private void EditButton_Click(object sender, RoutedEventArgs e)
         {
             if (_selectedGrid == null || _selectedGrid.SelectedItem == null)
@@ -1498,12 +1657,14 @@ namespace HospitalApp
             }
         }
 
+        // Метод для обработки изменения выбранного элемента DataGrid
         private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _selectedGrid = sender as DataGrid;
             _editableItem = _selectedGrid?.SelectedItem;
         }
 
+        // Метод для получения типа сущности по DataGrid
         private string GetEntityType(DataGrid grid)
         {
             if (grid == AdminPatientsGrid)
@@ -1517,17 +1678,13 @@ namespace HospitalApp
             return null;
         }
 
+        // Метод для обработки нажатия клавиш в DataGrid
         private void DataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Delete && sender is DataGrid grid && grid.SelectedItem != null && _currentRole == "Лаборант-Администратор")
             {
-                // Устанавливаем выбранную таблицу
                 _selectedGrid = grid;
-
-                // Вызываем логику удаления
                 DeleteButton_Click(sender, e);
-
-                // Предотвращаем дальнейшую обработку события Delete
                 e.Handled = true;
             }
         }

@@ -16,6 +16,8 @@ namespace HospitalApp
         private DateTime _sessionStartTime;
         private DispatcherTimer _timer;
 
+        // Конструктор страницы профиля
+        // Принимает ID пользователя и инициализирует компоненты
         public ProfilePage(int userId)
         {
             InitializeComponent();
@@ -32,6 +34,8 @@ namespace HospitalApp
         public string UserProfileIcon { get; set; }
 
         private string _currentTime;
+
+        // Свойство для отображения текущего времени
         public string CurrentTime
         {
             get => _currentTime;
@@ -43,6 +47,8 @@ namespace HospitalApp
         }
 
         private string _uptime;
+
+        // Свойство для отображения времени сессии (uptime)
         public string Uptime
         {
             get => _uptime;
@@ -53,13 +59,16 @@ namespace HospitalApp
             }
         }
 
+        // Событие для уведомления об изменении свойств (реализация INotifyPropertyChanged)
         public event PropertyChangedEventHandler PropertyChanged;
 
+        // Метод для вызова события PropertyChanged
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
+        // Загружает данные пользователя из базы данных
         private void LoadUserData()
         {
             using (var context = new HospitalBaseEntities())
@@ -74,9 +83,7 @@ namespace HospitalApp
                     LastLogin = user.Last_Login_Date;
                     Login = user.Login;
                     PswrdBox.Text = user.Password;
-
-                    // Set user profile icon based on role
-                    switch (user.Role?.Name ?? "Default")
+                    switch (user.Role?.Name ?? "Не указана")
                     {
                         case "Лаборант":
                             UserProfileIcon = "/Resources/laborant_2.png";
@@ -90,21 +97,9 @@ namespace HospitalApp
                         case "Бухгалтер":
                             UserProfileIcon = "/Resources/Бухгалтер.jpeg";
                             break;
-                        case "Admin":
-                            UserProfileIcon = "/Resources/AdminIcon.png";
-                            break;
-                        case "Doctor":
-                            UserProfileIcon = "/Resources/DoctorIcon.png";
-                            break;
-                        case "Patient":
-                            UserProfileIcon = "/Resources/PatientIcon.png";
-                            break;
                         default:
-                            UserProfileIcon = "/Resources/DefaultIcon.png";
                             break;
                     }
-
-                    // Determine session start time: use the earlier of Last_Login_Date or LastLoginTime
                     DateTime lastLoginTime = Settings.Default.LastLoginTime == DateTime.MinValue ? DateTime.Now : Settings.Default.LastLoginTime;
                     DateTime? lastLoginDate = user.Last_Login_Date;
                     if (lastLoginDate.HasValue && lastLoginDate.Value < lastLoginTime)
@@ -116,7 +111,6 @@ namespace HospitalApp
                         _sessionStartTime = lastLoginTime;
                     }
 
-                    // Update LastLoginTime only if it's uninitialized
                     if (Settings.Default.LastLoginTime == DateTime.MinValue)
                     {
                         Settings.Default.LastLoginTime = _sessionStartTime;
@@ -132,9 +126,10 @@ namespace HospitalApp
             }
         }
 
+        // Настраивает таймер для обновления текущего времени и продолжительности сессии
         private void SetupTimer()
         {
-            _timer = new DispatcherTimer
+            _timer = new DispatcherTimer(DispatcherPriority.Render)
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
@@ -144,9 +139,12 @@ namespace HospitalApp
                 TimeSpan sessionDuration = DateTime.Now - _sessionStartTime;
                 Uptime = sessionDuration.ToString(@"hh\:mm\:ss");
             };
+            _timer.IsEnabled = true;
             _timer.Start();
         }
 
+
+        // Обработчик кнопки сохранения изменений профиля
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             using (var context = new HospitalBaseEntities())
@@ -170,16 +168,20 @@ namespace HospitalApp
             }
         }
 
+        // Обработчик кнопки выхода из системы
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
+            _timer.Stop();
             Settings.Default.LastUserId = _userId;
             Settings.Default.Save();
             UserData.CurrentUserId = 0;
             NavigationService?.Navigate(new AuthorizePage());
         }
 
+        // Обработчик кнопки возврата назад
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
+            _timer.Stop();
             Settings.Default.LastUserId = _userId;
             Settings.Default.Save();
             NavigationService.GoBack();

@@ -23,8 +23,6 @@ namespace HospitalApp
                     MessageBox.Show("Ошибка: некорректные параметры экспорта!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-
-                // Удаляем существующий файл, если он есть
                 if (System.IO.File.Exists(filePath))
                     System.IO.File.Delete(filePath);
 
@@ -32,16 +30,11 @@ namespace HospitalApp
                 wordApp.Visible = false;
                 wordApp.DisplayAlerts = Word.WdAlertLevel.wdAlertsNone;
                 doc = wordApp.Documents.Add();
-
-                // Настройка стилей документа
                 SetDocumentStyles(doc);
-
-                // Добавляем титульный лист
                 AddTitlePage(doc, startDate, endDate);
 
                 using (var context = new HospitalBaseEntities())
                 {
-                    // Фильтрация данных
                     var data = new
                     {
                         Patients = context.Pacient.Include(p => p.Insurance_Company).ToList() ?? new List<Pacient>(),
@@ -49,8 +42,6 @@ namespace HospitalApp
                         Services = context.Service.ToList() ?? new List<Service>(),
                         Users = context.User.Include(u => u.Role).Include(u => u.Service).Include(u => u.Insurance_Company).ToList() ?? new List<User>()
                     };
-
-                    // Фильтрация по выбранным записям
                     if (selectedRecordIds != null && selectedRecordIds.Any())
                     {
                         data = new
@@ -69,8 +60,6 @@ namespace HospitalApp
                                 : true).ToList()
                         };
                     }
-
-                    // Фильтрация по периоду
                     if (startDate.HasValue && endDate.HasValue)
                     {
                         data = new
@@ -81,8 +70,6 @@ namespace HospitalApp
                             Users = data.Users.Where(u => u.Last_Login_Date >= startDate && u.Last_Login_Date <= endDate).ToList()
                         };
                     }
-
-                    // Основное содержимое отчета
                     AddReportTitle(doc, startDate, endDate);
 
                     bool isFirstTable = true;
@@ -132,16 +119,12 @@ namespace HospitalApp
                         }
                         isFirstTable = false;
                     }
-
-                    // Сохранение в выбранном формате
                     Word.WdSaveFormat saveFormat = isPdf
                         ? Word.WdSaveFormat.wdFormatPDF
                         : Word.WdSaveFormat.wdFormatDocumentDefault;
 
                     doc.SaveAs2(filePath, saveFormat);
                 }
-
-                // Закрытие документа
                 object doNotSave = Word.WdSaveOptions.wdDoNotSaveChanges;
                 doc.Close(ref doNotSave);
                 wordApp.Quit();
@@ -174,7 +157,6 @@ namespace HospitalApp
 
         private static void AddTitlePage(Word.Document doc, DateTime? startDate, DateTime? endDate)
         {
-            // Верхний заголовок
             Word.Paragraph header = doc.Paragraphs.Add();
             Word.Range headerRange = header.Range;
             headerRange.Text = "Государственное бюджетное учреждение здравоохранения\n" +
@@ -185,11 +167,7 @@ namespace HospitalApp
             headerRange.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
             headerRange.ParagraphFormat.SpaceAfter = 12;
             headerRange.InsertParagraphAfter();
-
-            // Разделительная линия
             AddSeparator(doc, 24);
-
-            // Название отчета
             Word.Paragraph title = doc.Paragraphs.Add();
             Word.Range titleRange = title.Range;
             titleRange.Text = "ОТЧЕТ\n";
@@ -198,8 +176,6 @@ namespace HospitalApp
             titleRange.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphCenter;
             titleRange.ParagraphFormat.SpaceAfter = 12;
             titleRange.InsertParagraphAfter();
-
-            // Период отчета
             if (startDate.HasValue && endDate.HasValue)
             {
                 Word.Paragraph period = doc.Paragraphs.Add();
@@ -210,16 +186,12 @@ namespace HospitalApp
                 periodRange.ParagraphFormat.SpaceAfter = 24;
                 periodRange.InsertParagraphAfter();
             }
-
-            // Дата и город
             Word.Paragraph footer = doc.Paragraphs.Add();
             Word.Range footerRange = footer.Range;
             footerRange.Text = $"Санкт-Петербург, {DateTime.Now:yyyy}";
             footerRange.Font.Size = 14;
             footerRange.ParagraphFormat.Alignment = Word.WdParagraphAlignment.wdAlignParagraphRight;
             footerRange.InsertParagraphAfter();
-
-            // Разрыв страницы
             AddPageBreak(doc);
         }
 

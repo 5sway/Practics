@@ -198,18 +198,45 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <DataGrid x:Name="AdminPatientsGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,0,0,5" 
-                                  IsReadOnly="{Binding IsPatientsGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown">
+          IsReadOnly="{Binding IsPatientsGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="ФИО" Binding="{Binding Full_Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                <DataGridTextColumn Header="Дата рождения" Binding="{Binding Birth_Date, StringFormat=dd.MM.yyyy, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridTemplateColumn Header="Дата рождения" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Birth_Date, StringFormat=dd.MM.yyyy}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <DatePicker SelectedDate="{Binding Birth_Date, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
                                 <DataGridTextColumn Header="Паспорт" Binding="{Binding Passport, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                 <DataGridTextColumn Header="Телефон" Binding="{Binding Phone_Number, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                 <DataGridTextColumn Header="Email" Binding="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                 <DataGridTextColumn Header="Полис" Binding="{Binding Policy, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                <DataGridTextColumn Header="Тип полиса" Binding="{Binding Policy_Type, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridComboBoxColumn Header="Тип полиса" 
+                                SelectedValueBinding="{Binding Policy_Type, UpdateSourceTrigger=PropertyChanged}" 
+                                ItemsSource="{Binding Source={x:Static local:MainPage.PolicyTypes}}" Width="Auto"/>
                                 <DataGridComboBoxColumn Header="Страховая компания" 
-                                                        SelectedValueBinding="{Binding Insurance_Company_Id, UpdateSourceTrigger=PropertyChanged}" 
-                                                        DisplayMemberPath="Title" SelectedValuePath="Insurance_Company_Id" Width="*"/>
+                                SelectedValueBinding="{Binding Insurance_Company_Id, UpdateSourceTrigger=PropertyChanged}" 
+                                DisplayMemberPath="Title" SelectedValuePath="Insurance_Company_Id" Width="*"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <DataGrid x:Name="ServicesGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,5" Grid.Row="2" 
+          IsReadOnly="{Binding IsServicesGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Название" Binding="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                                <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat={}{0:N2} ₽, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridTextColumn Header="Срок (дни)" Binding="{Binding Deadline, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridTextColumn Header="Допуск (%)" Width="Auto">
+                                    <DataGridTextColumn.Binding>
+                                        <Binding Path="Deviation" UpdateSourceTrigger="PropertyChanged" StringFormat="{}{0:N2}%"/>
+                                    </DataGridTextColumn.Binding>
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                         <DataGrid x:Name="AdminOrdersGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,5" Grid.Row="1" 
@@ -254,23 +281,6 @@
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellEditingTemplate>
                                 </DataGridTemplateColumn>
-                            </DataGrid.Columns>
-                        </DataGrid>
-                        <DataGrid x:Name="ServicesGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,5" Grid.Row="2" 
-                                  IsReadOnly="{Binding IsServicesGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Название" Binding="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat={}{0:N2} ₽, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                <DataGridTextColumn Header="Срок (дни)" Binding="{Binding Deadline, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                <DataGridTextColumn Header="Допуск (%)" Width="Auto">
-                                    <DataGridTextColumn.Binding>
-                                        <Binding Path="Deviation" UpdateSourceTrigger="PropertyChanged" StringFormat="P0">
-                                            <Binding.Converter>
-                                                <local:DeviationToPercentConverter/>
-                                            </Binding.Converter>
-                                        </Binding>
-                                    </DataGridTextColumn.Binding>
-                                </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                         <DataGrid x:Name="UsersGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,0" Grid.Row="3" 

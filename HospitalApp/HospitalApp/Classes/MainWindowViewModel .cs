@@ -76,7 +76,7 @@ namespace HospitalApp
             }
 
             UserFullName = _currentUser.Full_Name;
-            switch (_currentUser.Role?.Name ?? "Default")
+            switch (_currentUser.Role?.Name ?? "Не указана")
             {
                 case "Лаборант":
                     UserProfileIcon = "/Resources/laborant_2.png";
@@ -90,17 +90,7 @@ namespace HospitalApp
                 case "Бухгалтер":
                     UserProfileIcon = "/Resources/Бухгалтер.jpeg";
                     break;
-                case "Admin":
-                    UserProfileIcon = "/Resources/AdminIcon.png";
-                    break;
-                case "Doctor":
-                    UserProfileIcon = "/Resources/DoctorIcon.png";
-                    break;
-                case "Patient":
-                    UserProfileIcon = "/Resources/PatientIcon.png";
-                    break;
                 default:
-                    UserProfileIcon = "/Resources/DefaultIcon.png";
                     break;
             }
         }

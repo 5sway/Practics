@@ -40,15 +40,11 @@ namespace HospitalApp
                     var orders = context.Order.Include(o => o.Pacient).Include(o => o.Service).ToList() ?? new List<Order>();
                     var services = context.Service.ToList() ?? new List<Service>();
                     var users = context.User.Include(u => u.Role).Include(u => u.Service).Include(u => u.Insurance_Company).ToList() ?? new List<User>();
-
-                    // Фильтрация по периоду
                     if (startDate.HasValue && endDate.HasValue)
                     {
                         orders = orders.Where(o => o.Create_Date >= startDate && o.Create_Date <= endDate).ToList();
                         users = users.Where(u => u.Last_Login_Date >= startDate && u.Last_Login_Date <= endDate).ToList();
                     }
-
-                    // Фильтрация по выбранным записям
                     if (selectedRecordIds.Any())
                     {
                         patients = selectedRecordIds.ContainsKey("Patients")

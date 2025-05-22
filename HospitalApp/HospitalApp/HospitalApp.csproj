@@ -225,14 +225,11 @@
     <Compile Include="Analyzer.cs">
       <DependentUpon>HospitalModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Classes\BooleanToStatusConverter.cs" />
     <Compile Include="Classes\AuthorizePageViewModel.cs" />
-    <Compile Include="Classes\BooleanToVisibilityConverter.cs" />
     <Compile Include="Classes\CaptchaGenerator.cs" />
     <Compile Include="Classes\ExportExcel.cs" />
     <Compile Include="Classes\ExportWord.cs" />
-    <Compile Include="Classes\DeviationToPercentConverter.cs" />
-    <Compile Include="EditWindow.cs" />
+    <Compile Include="Classes\EditWindow.cs" />
     <Compile Include="HospitalModel.Context.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -270,7 +267,6 @@
     <Compile Include="Service_Provided.cs">
       <DependentUpon>HospitalModel.tt</DependentUpon>
     </Compile>
-    <Compile Include="Classes\StatusToTextConverter.cs" />
     <Compile Include="sysdiagrams.cs">
       <DependentUpon>HospitalModel.tt</DependentUpon>
     </Compile>
@@ -278,7 +274,6 @@
       <DependentUpon>HospitalModel.tt</DependentUpon>
     </Compile>
     <Compile Include="Classes\UserData.cs" />
-    <Compile Include="Classes\UserExtensions.cs" />
     <Page Include="Pages\AuthorizePage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -15,6 +15,7 @@ namespace HospitalApp
 {
     public partial class AuthorizePage : Page
     {
+        // Импорт функций WinAPI для управления таймером
         [DllImport("winmm.dll")]
         public static extern uint timeBeginPeriod(uint period);
         [DllImport("winmm.dll")]
@@ -32,6 +33,7 @@ namespace HospitalApp
         private DispatcherTimer _gifStartTimer;
         private string _currentGifPath;
 
+        // Конструктор страницы авторизации
         public AuthorizePage()
         {
             InitializeComponent();
@@ -55,7 +57,6 @@ namespace HospitalApp
                 bitmap.EndInit();
                 ImageBehavior.SetAnimatedSource(TogglePasswordIcon, bitmap);
                 ImageBehavior.SetAutoStart(TogglePasswordIcon, false);
-                System.Diagnostics.Debug.WriteLine($"Initial GIF loaded: {_currentGifPath}, stopped");
             }
             catch (Exception ex)
             {
@@ -63,11 +64,13 @@ namespace HospitalApp
             }
         }
 
+        // Деструктор (освобождение ресурсов таймера)
         ~AuthorizePage()
         {
             timeEndPeriod(1);
         }
 
+        // Настройка начального состояния страницы
         private void SetupInitialState()
         {
             _errorTimer = new DispatcherTimer(DispatcherPriority.Send)
@@ -88,28 +91,26 @@ namespace HospitalApp
 
             _gifStopTimer = new DispatcherTimer(DispatcherPriority.Send)
             {
-                Interval = TimeSpan.FromSeconds(1.0) // Временно 1 сек, проверьте длительность GIF в Ezgif.com
-                // Ожидаемая длительность ~1.5 сек / 2x = 0.75 сек
+                Interval = TimeSpan.FromSeconds(1.0)
             };
             _gifStopTimer.Tick += (s, e) =>
             {
                 ImageBehavior.SetAutoStart(TogglePasswordIcon, false);
                 _gifStopTimer.Stop();
-                System.Diagnostics.Debug.WriteLine($"GIF animation stopped: {_currentGifPath}");
             };
 
             _gifStartTimer = new DispatcherTimer(DispatcherPriority.Render)
             {
-                Interval = TimeSpan.FromMilliseconds(200) // Увеличено для надежного запуска
+                Interval = TimeSpan.FromMilliseconds(200)
             };
             _gifStartTimer.Tick += (s, e) =>
             {
                 ImageBehavior.SetAutoStart(TogglePasswordIcon, true);
-                System.Diagnostics.Debug.WriteLine($"Forced GIF start: {_currentGifPath}");
                 _gifStartTimer.Stop();
             };
         }
 
+        // Обновление состояния поля пароля (видимое/скрытое)
         private void UpdatePasswordFieldState()
         {
             string password = _isPasswordVisible ? PasswordTextBoxVisible.Text : PasswordTextBox.Password;
@@ -117,6 +118,7 @@ namespace HospitalApp
             UpdatePlaceholderVisibility();
         }
 
+        // Обработчик плавного таймера (для анимаций и блокировок)
         private void SmoothTimer_Tick(object sender, EventArgs e)
         {
             if (_viewModel.InputLockUntil.HasValue && DateTime.Now < _viewModel.InputLockUntil.Value)
@@ -147,6 +149,7 @@ namespace HospitalApp
             _smoothTimer.Stop();
         }
 
+        // Переключение видимости пароля (кнопка "глаз")
         private void TogglePasswordBtn_Click(object sender, RoutedEventArgs e)
         {
             _isPasswordVisible = !_isPasswordVisible;
@@ -166,35 +169,23 @@ namespace HospitalApp
                     PasswordTextBoxVisible.Visibility = Visibility.Collapsed;
                     PasswordTextBox.Visibility = Visibility.Visible;
                 }
-
-                // Используем одну гифку для обоих состояний
                 string newGifPath = "/Resources/eye_animation.gif";
-
-                // Получаем текущий контроллер анимации
                 var controller = ImageBehavior.GetAnimationController(TogglePasswordIcon);
-
-                // Если анимация уже запущена (проверяем через controller != null)
                 if (controller != null && controller.IsPaused == false)
                 {
-                    // Сбрасываем анимацию
                     ImageBehavior.SetAnimatedSource(TogglePasswordIcon, null);
-                    System.Diagnostics.Debug.WriteLine("GIF animation reset");
                 }
                 else
                 {
-                    // Создаем новый BitmapImage без кэширования
                     var bitmap = new BitmapImage();
                     bitmap.BeginInit();
                     bitmap.UriSource = new Uri(newGifPath, UriKind.Relative);
                     bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
                     bitmap.CacheOption = BitmapCacheOption.OnLoad;
                     bitmap.EndInit();
-
-                    // Устанавливаем новую анимацию и проигрываем один раз
                     ImageBehavior.SetAnimatedSource(TogglePasswordIcon, bitmap);
                     ImageBehavior.SetRepeatBehavior(TogglePasswordIcon, new System.Windows.Media.Animation.RepeatBehavior(1));
                     ImageBehavior.SetAutoStart(TogglePasswordIcon, true);
-                    System.Diagnostics.Debug.WriteLine("Starting GIF animation once");
                 }
 
                 UpdatePlaceholderVisibility();
@@ -205,6 +196,7 @@ namespace HospitalApp
             }
         }
 
+        // Отображение сообщения об ошибке
         private void ShowError(string message)
         {
             if (_errorTimer.IsEnabled)
@@ -246,6 +238,7 @@ namespace HospitalApp
             _errorTimer.Start();
         }
 
+        // Скрытие сообщения об ошибке
         private void HideError()
         {
             _viewModel.ErrorVisibility = Visibility.Collapsed;
@@ -254,6 +247,7 @@ namespace HospitalApp
             ErrorText.Margin = new Thickness(0, 0, 0, 0);
         }
 
+        // Генерация новой капчи
         private void GenerateNewCaptcha()
         {
             _captchaText = CaptchaGenerator.GenerateCaptchaText();
@@ -265,6 +259,7 @@ namespace HospitalApp
             ImageBehavior.SetAutoStart(RefreshGif, false);
         }
 
+        // Скрытие интерфейса капчи
         private void HideCaptchaUI()
         {
             _viewModel.CaptchaVisibility = Visibility.Collapsed;
@@ -275,6 +270,7 @@ namespace HospitalApp
             UpdatePlaceholderVisibility();
         }
 
+        // Проверка находится ли капча в "периоде спокойствия"
         private bool IsCaptchaInGracePeriod()
         {
             bool isInGracePeriod = _viewModel.CaptchaGraceUntil.HasValue && DateTime.Now < _viewModel.CaptchaGraceUntil.Value;
@@ -286,6 +282,7 @@ namespace HospitalApp
             return isInGracePeriod;
         }
 
+        // Запрос отображения капчи
         private void RequestCaptcha()
         {
             GenerateNewCaptcha();
@@ -294,6 +291,7 @@ namespace HospitalApp
             _viewModel.ErrorVisibility = Visibility.Collapsed;
         }
 
+        // Проверка учетных данных (логин/пароль)
         private void VerifyCredentials()
         {
             string login = LoginTextBox.Text.Trim();
@@ -348,6 +346,7 @@ namespace HospitalApp
             AuthorizeUser();
         }
 
+        // Авторизация с проверкой капчи
         private void AuthorizeWithCaptcha()
         {
             string enteredCaptcha = CaptchaTextBox.Text.Trim();
@@ -395,6 +394,7 @@ namespace HospitalApp
             AuthorizeUser();
         }
 
+        // Сброс UI авторизации
         private void ResetLoginUI(bool clearInputs = true)
         {
             HideCaptchaUI();
@@ -414,7 +414,6 @@ namespace HospitalApp
                 Dispatcher.Invoke(() =>
                 {
                     ImageBehavior.SetAnimatedSource(TogglePasswordIcon, null);
-                    System.Diagnostics.Debug.WriteLine("GIF animation reset in ResetLoginUI");
                 });
             }
             catch (Exception ex)
@@ -426,6 +425,7 @@ namespace HospitalApp
 
         }
 
+        // Основной метод авторизации пользователя
         private void AuthorizeUser()
         {
             if (string.IsNullOrWhiteSpace(_pendingLogin) || string.IsNullOrWhiteSpace(_pendingPassword))
@@ -445,13 +445,10 @@ namespace HospitalApp
                 _pendingPassword = null;
                 return;
             }
-
-            // Обновление Last_Login_Date
             try
             {
                 user.Last_Login_Date = DateTime.Now;
                 HospitalBaseEntities.GetContext().SaveChanges();
-                System.Diagnostics.Debug.WriteLine($"Updated Last_Login_Date for user {user.Login}: {user.Last_Login_Date}");
             }
             catch (Exception ex)
             {
@@ -459,14 +456,11 @@ namespace HospitalApp
                 ShowError("Ошибка сохранения данных входа!");
                 return;
             }
-
-            // Сохранение данных для автоматической авторизации
             try
             {
                 Properties.Settings.Default.LastUserId = user.User_Id;
                 Properties.Settings.Default.LastLoginTime = DateTime.Now;
                 Properties.Settings.Default.Save();
-                System.Diagnostics.Debug.WriteLine($"Saved auto-login: UserId={user.User_Id}, Time={DateTime.Now}");
             }
             catch (Exception ex)
             {
@@ -482,6 +476,7 @@ namespace HospitalApp
             ResetLoginUI();
         }
 
+        // Обновление видимости плейсхолдеров (подсказок)
         private void UpdatePlaceholderVisibility()
         {
             LoginTxt.Visibility = string.IsNullOrWhiteSpace(LoginTextBox.Text) ? Visibility.Visible : Visibility.Collapsed;
@@ -491,6 +486,7 @@ namespace HospitalApp
             CaptchaText.Visibility = string.IsNullOrWhiteSpace(CaptchaTextBox.Text) ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        // Обработчики событий клавиатуры:
         private void LoginTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -509,6 +505,7 @@ namespace HospitalApp
                 AuthorizeWithCaptcha();
         }
 
+        // Обработчики фокуса элементов:
         private void LoginBox_GotFocus(object sender, RoutedEventArgs e)
         {
             LoginTxt.Visibility = Visibility.Collapsed;
@@ -538,7 +535,8 @@ namespace HospitalApp
         {
             UpdatePlaceholderVisibility();
         }
-
+        
+        // Обработчики кликов по плейсхолдерам:
         private void LoginTxt_MouseDown(object sender, MouseButtonEventArgs e)
         {
             LoginTxt.Visibility = Visibility.Collapsed;
@@ -559,7 +557,8 @@ namespace HospitalApp
             CaptchaText.Visibility = Visibility.Collapsed;
             CaptchaTextBox.Focus();
         }
-
+        
+        // Обработчики кнопок:
         private void LoginBtn_Click(object sender, RoutedEventArgs e)
         {
             VerifyCredentials();
