@@ -22,7 +22,7 @@
             <Setter Property="BorderBrush" Value="#CCCCCC"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Width" Value="250"/>
-            <Setter Property="Margin" Value="5,5,0,0                                            "/>
+            <Setter Property="Margin" Value="5"/>
         </Style>
         <Style TargetType="PasswordBox">
             <Setter Property="FontSize" Value="14"/>
@@ -63,52 +63,78 @@
                 </Setter.Value>
             </Setter>
         </Style>
-    </Page.Resources>
-    <Grid Background="#F5F5F5">
-        <Grid>
-            <TextBlock Text="Профиль" FontSize="24" Margin="0,20,0,0" VerticalAlignment="Center" HorizontalAlignment="Center" Foreground="Black" />
-            <Button Content="Выход" Click="ExitButton_Click" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" Width="80" Background="#DC3545">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                        <Setter Property="Background" Value="#DC3545"/>
-                        <Style.Triggers>
+        <Style TargetType="Button" x:Key="ExitButton">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Background" Value="#DC3545"/>
+            <Setter Property="BorderBrush" Value="#C82333"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="10,5"/>
+            <Setter Property="Width" Value="80"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="3">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#C82333"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter Property="Background" Value="#B31B2B"/>
                             </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Page.Resources>
+    <Grid Background="#F5F5F5">
+        <Grid>
+            <Button Content="Выход" Click="ExitButton_Click" Style="{StaticResource ExitButton}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0"/>
         </Grid>
         <!-- Content Row -->
-        <Border Background="White" Margin="20,0,0,30" Padding="20" CornerRadius="5" BorderBrush="#CCCCCC" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="400" Height="300">
+        <Border Background="White" Margin="20,0,0,30" Padding="20" CornerRadius="5" BorderBrush="#CCCCCC" BorderThickness="1" HorizontalAlignment="Center" VerticalAlignment="Center" Width="400" Height="350">
             <Grid>
+                <!-- Profile Header -->
+                <Border CornerRadius="12" VerticalAlignment="Top" HorizontalAlignment="Left" Background="Transparent" Width="100" Height="50" Margin="10,0,0,10">
+                    <Grid>
+                        <Image Source="{Binding UserProfileIcon}" VerticalAlignment="Center" HorizontalAlignment="Left" Width="40" Height="40" Margin="5,0,0,0">
+                            <Image.Clip>
+                                <EllipseGeometry Center="20,20" RadiusX="20" RadiusY="20"/>
+                            </Image.Clip>
+                        </Image>
+                        <TextBlock Text="{Binding FullName}" Foreground="White" FontSize="14" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="50,0,0,0"/>
+                    </Grid>
+                </Border>
+                <TextBlock Text="Профиль" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,10,0,0" FontSize="20" FontWeight="SemiBold"></TextBlock>
                 <!-- Full Name -->
-                <TextBlock Text="ФИО:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,10,0,0"/>
-                <TextBox VerticalAlignment="Top" Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}"/>
+                <TextBlock Text="ФИО:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,60,0,0"/>
+                <TextBox Text="{Binding FullName, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Margin="5,55,0,0"/>
 
                 <!-- Role (Read-Only) -->
-                <TextBlock Text="Роль:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,50,0,0"/>
-                <TextBlock VerticalAlignment="Top" Margin="55,50,0,0" Text="{Binding Role, Mode=OneWay}" FontWeight="SemiBold"/>
+                <TextBlock Text="Роль:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,100,0,0"/>
+                <TextBlock Text="{Binding Role, Mode=OneWay}" FontWeight="SemiBold" VerticalAlignment="Top" Margin="55,100,0,0"/>
 
                 <!-- Login -->
-                <TextBlock Text="Логин:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,100,0,0"/>
-                <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Margin="5,95,0,0"/>
+                <TextBlock Text="Логин:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,145,0,0"/>
+                <TextBox Text="{Binding Login, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Top" Margin="5,140,0,0"/>
 
                 <!-- Password -->
-                <TextBlock Text="Пароль:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,150,0,0"/>
-                <TextBox Name="PswrdBox" VerticalAlignment="Top" Margin="5,145,0,0"/>
+                <TextBlock Text="Пароль:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,190,0,0"/>
+                <TextBox x:Name="PswrdBox" VerticalAlignment="Top" Margin="5,185,0,0"/>
 
                 <!-- Current Time -->
-                <TextBlock Text="Текущее время:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,190,0,0"/>
-                <TextBlock x:Name="CurrentTimeText" Text="{Binding CurrentTime, Mode=OneWay, StringFormat='dd.MM.yyyy HH:mm:ss'}" FontWeight="SemiBold" VerticalAlignment="Top" Margin="110,190,0,0"/>
+                <TextBlock Text="Текущее время:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,235,0,0"/>
+                <TextBlock x:Name="CurrentTimeText" Text="{Binding CurrentTime, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" VerticalAlignment="Top" Margin="110,235,0,0"/>
 
                 <!-- Uptime -->
-                <TextBlock Text="Время работы:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,225,0,0"/>
-                <TextBlock x:Name="UptimeText" Text="{Binding Uptime, Mode=OneWay}" FontWeight="SemiBold" VerticalAlignment="Top" Margin="110,225,0,0"/>
+                <TextBlock Text="Время работы:" FontWeight="SemiBold" VerticalAlignment="Top" Margin="5,270,0,0"/>
+                <TextBlock x:Name="UptimeText" Text="{Binding Uptime, UpdateSourceTrigger=PropertyChanged}" FontWeight="SemiBold" VerticalAlignment="Top" Margin="110,270,0,0"/>
             </Grid>
         </Border>
         <!-- Button Row -->
@@ -116,24 +142,9 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Content="Сохранить изменения" Click="SaveButton_Click" Height="25" Margin="5,0,165,35" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
-            <Button Content="Назад" Click="BackButton_Click" Background="#DC3545" Height="25" Margin="185,0,0,35" VerticalAlignment="Bottom" HorizontalAlignment="Center">
-                <Button.Style>
-                    <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-                        <Setter Property="Background" Value="#DC3545"/>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#C82333"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#B31B2B"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
+            <Button Content="Сохранить изменения" Click="SaveButton_Click" Height="25" Margin="5,0,135,15" VerticalAlignment="Bottom" HorizontalAlignment="Center"/>
+            <Button Content="Назад" Click="BackButton_Click" Style="{StaticResource ExitButton}" Height="25" Margin="200,0,0,15" VerticalAlignment="Bottom" HorizontalAlignment="Center" Width="100"/>
         </Grid>
     </Grid>
 </Page>

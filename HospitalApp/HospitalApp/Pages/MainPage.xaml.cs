@@ -1,21 +1,21 @@
-﻿using BarcodeStandard;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using SkiaSharp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Data.Entity.Validation;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
+using System.Windows.Controls;  
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+
 
 namespace HospitalApp
 {
@@ -61,6 +61,8 @@ namespace HospitalApp
         private bool _isAdminTabSelected;
         private bool _isReportsTabSelected;
         private DateTime? _analysisDate;
+        private bool _isEditingOrAdding = false;
+        public List<string> StatusOptions { get; } = new List<string> { "В работе", "Выполнен" };
 
         public bool IsTableFormat
         {
@@ -76,7 +78,26 @@ namespace HospitalApp
         public DateTime? AnalysisDate
         {
             get => _analysisDate;
-            set { _analysisDate = value; OnPropertyChanged(nameof(AnalysisDate)); }
+            set
+            {
+                if (value.HasValue)
+                {
+                    // Combine the selected date with the current time
+                    DateTime currentTime = DateTime.Now;
+                    _analysisDate = new DateTime(
+                        value.Value.Year,
+                        value.Value.Month,
+                        value.Value.Day,
+                        currentTime.Hour,
+                        currentTime.Minute,
+                        currentTime.Second);
+                }
+                else
+                {
+                    _analysisDate = value;
+                }
+                OnPropertyChanged(nameof(AnalysisDate));
+            }
         }
 
         public string SelectedFormat
@@ -335,13 +356,16 @@ namespace HospitalApp
             set { _isReportsTabSelected = value; OnPropertyChanged(nameof(IsReportsTabSelected)); }
         }
 
-        public List<string> StatusOptions { get; } = new List<string> { "В работе", "Выполнен" };
-
         public event PropertyChangedEventHandler PropertyChanged;
-
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        public string EditButtonContent
+        {
+            get => _isEditingOrAdding ? "Сохранить" : "Изменить";
+            set => OnPropertyChanged(nameof(EditButtonContent));
         }
 
         public MainPage(string role)
@@ -457,10 +481,6 @@ namespace HospitalApp
                 var userServiceColumn = UsersGrid.Columns.FirstOrDefault(c => c.Header.ToString() == "Услуга") as DataGridComboBoxColumn;
                 if (userServiceColumn != null)
                     userServiceColumn.ItemsSource = services;
-
-                var statusColumn = AdminOrdersGrid.Columns.FirstOrDefault(c => c.Header.ToString() == "Статус") as DataGridComboBoxColumn;
-                if (statusColumn != null)
-                    statusColumn.ItemsSource = StatusOptions;
             }
         }
 
@@ -538,58 +558,6 @@ namespace HospitalApp
 
                     OrdersGrid.ItemsSource = OrdersGrid.ItemsSource;
                     PatientsGrid.ItemsSource = PatientsGrid.ItemsSource;
-                }
-                e.Handled = true;
-            }
-        }
-
-        private void DataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Delete && sender is DataGrid grid && grid.SelectedItem != null &&
-                (_currentRole == "Лаборант-Администратор" || _currentRole == "Бухгалтер"))
-            {
-                if (MessageBox.Show("Вы уверены, что хотите удалить эту запись из базы данных?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
-                {
-                    using (var context = new HospitalBaseEntities())
-                    {
-                        try
-                        {
-                            if (grid == AdminPatientsGrid)
-                            {
-                                var patient = grid.SelectedItem as Pacient;
-                                var dbPatient = context.Pacient.FirstOrDefault(p => p.Pacient_Id == patient.Pacient_Id);
-                                if (dbPatient != null)
-                                    context.Pacient.Remove(dbPatient);
-                            }
-                            else if (grid == AdminOrdersGrid)
-                            {
-                                var order = grid.SelectedItem as Order;
-                                var dbOrder = context.Order.FirstOrDefault(o => o.Order_Id == order.Order_Id);
-                                if (dbOrder != null)
-                                    context.Order.Remove(dbOrder);
-                            }
-                            else if (grid == ServicesGrid)
-                            {
-                                var service = grid.SelectedItem as Service;
-                                var dbService = context.Service.FirstOrDefault(s => s.Service_Id == service.Service_Id);
-                                if (dbService != null)
-                                    context.Service.Remove(dbService);
-                            }
-                            else if (grid == UsersGrid)
-                            {
-                                var user = grid.SelectedItem as User;
-                                var dbUser = context.User.FirstOrDefault(u => u.User_Id == user.User_Id);
-                                if (dbUser != null)
-                                    context.User.Remove(dbUser);
-                            }
-                            context.SaveChanges();
-                            LoadAdminData();
-                        }
-                        catch (Exception ex)
-                        {
-                            MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                        }
-                    }
                 }
                 e.Handled = true;
             }
@@ -1117,51 +1085,6 @@ namespace HospitalApp
             }
         }
 
-        private void DataGrid_MouseEnter(object sender, MouseEventArgs e)
-        {
-            if (sender is DataGrid grid)
-            {
-                switch (_currentRole)
-                {
-                    case "Лаборант":
-                        LabTabScrollViewer.CanContentScroll = false;
-                        break;
-                    case "Лаборант-Исследователь":
-                        ResearcherTabScrollViewer.CanContentScroll = false;
-                        break;
-                    case "Лаборант-Администратор":
-                        AdminTabScrollViewer.CanContentScroll = false;
-                        break;
-                    case "Бухгалтер":
-                        // No scroll disabling for Accountant tab to ensure smooth interaction
-                        break;
-                }
-                grid.Focus();
-            }
-        }
-
-        private void DataGrid_MouseLeave(object sender, MouseEventArgs e)
-        {
-            if (sender is DataGrid)
-            {
-                switch (_currentRole)
-                {
-                    case "Лаборант":
-                        LabTabScrollViewer.CanContentScroll = true;
-                        break;
-                    case "Лаборант-Исследователь":
-                        ResearcherTabScrollViewer.CanContentScroll = true;
-                        break;
-                    case "Лаборант-Администратор":
-                        AdminTabScrollViewer.CanContentScroll = true;
-                        break;
-                    case "Бухгалтер":
-                        // No scroll enabling needed
-                        break;
-                }
-            }
-        }
-
         private void ServiceProvidedGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (ServiceProvidedGrid.SelectedItem != null)
@@ -1208,7 +1131,15 @@ namespace HospitalApp
                     if (order.Order_Status != newStatus)
                     {
                         order.Order_Status = newStatus;
-                        order.Complete_Time = AnalysisDate;
+                        // Ensure Complete_Time has the current time
+                        DateTime currentTime = DateTime.Now;
+                        order.Complete_Time = new DateTime(
+                            AnalysisDate.Value.Year,
+                            AnalysisDate.Value.Month,
+                            AnalysisDate.Value.Day,
+                            currentTime.Hour,
+                            currentTime.Minute,
+                            currentTime.Second);
                         context.SaveChanges();
                         LoadServiceProvidedData();
                         if (_currentRole == "Лаборант")
@@ -1367,105 +1298,6 @@ namespace HospitalApp
             }
         }
 
-        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            _selectedGrid = sender as DataGrid;
-            if (_selectedGrid?.SelectedItem != null)
-            {
-                _editableItem = _selectedGrid.SelectedItem;
-            }
-            else
-            {
-                _editableItem = null;
-            }
-        }
-
-        private void AddButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_selectedGrid == null)
-            {
-                MessageBox.Show("Выберите таблицу для добавления записи!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            try
-            {
-                using (var context = new HospitalBaseEntities())
-                {
-                    object newItem = null;
-
-                    if (_selectedGrid == AdminPatientsGrid)
-                    {
-                        newItem = new Pacient
-                        {
-                            Full_Name = "Новый пациент",
-                            Policy = "Не указано",
-                            Birth_Date = DateTime.Now,
-                            Insurance_Company_Id = context.Insurance_Company.FirstOrDefault()?.Insurance_Company_Id ?? 1
-                        };
-                        context.Pacient.Add((Pacient)newItem);
-                    }
-                    else if (_selectedGrid == AdminOrdersGrid)
-                    {
-                        newItem = new Order
-                        {
-                            Create_Date = DateTime.Now,
-                            Order_Status = false,
-                            Pacient_Id = context.Pacient.FirstOrDefault()?.Pacient_Id ?? 0,
-                            Service_Id = context.Service.FirstOrDefault()?.Service_Id ?? 0
-                        };
-                        context.Order.Add((Order)newItem);
-                    }
-                    else if (_selectedGrid == ServicesGrid)
-                    {
-                        newItem = new Service { Title = "Новая услуга", Price = 0, Deadline = 1, Deviation = 0 };
-                        context.Service.Add((Service)newItem);
-                    }
-                    else if (_selectedGrid == UsersGrid)
-                    {
-                        newItem = new User
-                        {
-                            Full_Name = "Новый пользователь",
-                            Login = "new_user",
-                            Role_Id = context.Role.FirstOrDefault()?.Role_Id ?? 1,
-                            Service_Id = context.Service.FirstOrDefault()?.Service_Id ?? 1,
-                            Last_Login_Date = DateTime.Now,
-                            Password = "default_password"
-                        };
-                        context.User.Add((User)newItem);
-                    }
-
-                    context.SaveChanges();
-                    LoadAdminData();
-
-                    if (newItem != null)
-                    {
-                        _selectedGrid.ItemsSource = _selectedGrid.ItemsSource;
-                        _selectedGrid.ScrollIntoView(newItem);
-                        _selectedGrid.SelectedItem = newItem;
-                        _editableItem = newItem;
-                        SetGridEditMode(_selectedGrid, newItem);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Ошибка при добавлении записи: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void EditButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_selectedGrid == null || _selectedGrid.SelectedItem == null)
-            {
-                MessageBox.Show("Выберите запись для редактирования!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            _editableItem = _selectedGrid.SelectedItem;
-            SetGridEditMode(_selectedGrid, _editableItem);
-        }
-
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
             if (_selectedGrid == null || _selectedGrid.SelectedItem == null)
@@ -1474,15 +1306,88 @@ namespace HospitalApp
                 return;
             }
 
-            if (MessageBox.Show("Вы уверены, что хотите удалить эту запись?", "Подтверждение", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+            if (MessageBox.Show("Вы уверены, что хотите удалить эту запись?", "Подтверждение",
+                MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
             {
-                using (var context = new HospitalBaseEntities())
+                try
                 {
-                    context.Entry(_selectedGrid.SelectedItem).State = EntityState.Deleted;
-                    context.SaveChanges();
+                    using (var context = new HospitalBaseEntities())
+                    {
+                        var selectedItem = _selectedGrid.SelectedItem;
+
+                        if (selectedItem is Pacient patient)
+                        {
+                            if (patient.Pacient_Id == 0) // Новая, несохраненная запись
+                            {
+                                ((IList)_selectedGrid.ItemsSource).Remove(selectedItem);
+                            }
+                            else
+                            {
+                                var dbPatient = context.Pacient.Find(patient.Pacient_Id);
+                                if (dbPatient != null)
+                                {
+                                    context.Pacient.Remove(dbPatient);
+                                    context.SaveChanges();
+                                }
+                            }
+                        }
+                        else if (selectedItem is Order order)
+                        {
+                            if (order.Order_Id == 0) // Новая, несохраненная запись
+                            {
+                                ((IList)_selectedGrid.ItemsSource).Remove(selectedItem);
+                            }
+                            else
+                            {
+                                var dbOrder = context.Order.Find(order.Order_Id);
+                                if (dbOrder != null)
+                                {
+                                    context.Order.Remove(dbOrder);
+                                    context.SaveChanges();
+                                }
+                            }
+                        }
+                        else if (selectedItem is Service service)
+                        {
+                            if (service.Service_Id == 0) // Новая, несохраненная запись
+                            {
+                                ((IList)_selectedGrid.ItemsSource).Remove(selectedItem);
+                            }
+                            else
+                            {
+                                var dbService = context.Service.Find(service.Service_Id);
+                                if (dbService != null)
+                                {
+                                    context.Service.Remove(dbService);
+                                    context.SaveChanges();
+                                }
+                            }
+                        }
+                        else if (selectedItem is User user)
+                        {
+                            if (user.User_Id == 0) // Новая, несохраненная запись
+                            {
+                                ((IList)_selectedGrid.ItemsSource).Remove(selectedItem);
+                            }
+                            else
+                            {
+                                var dbUser = context.User.Find(user.User_Id);
+                                if (dbUser != null)
+                                {
+                                    context.User.Remove(dbUser);
+                                    context.SaveChanges();
+                                }
+                            }
+                        }
+
+                        LoadAdminData();
+                        ResetEditMode();
+                    }
                 }
-                LoadAdminData();
-                ResetEditMode();
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Ошибка при удалении: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
@@ -1494,7 +1399,22 @@ namespace HospitalApp
                 {
                     try
                     {
-                        context.Entry(_editableItem).State = EntityState.Modified;
+                        // Проверяем, что редактируемая запись существует в базе
+                        var entity = context.Entry(_editableItem);
+                        if (entity.State == EntityState.Detached)
+                        {
+                            // Присоединяем объект к контексту
+                            if (_selectedGrid == AdminPatientsGrid)
+                                context.Pacient.Attach((Pacient)_editableItem);
+                            else if (_selectedGrid == AdminOrdersGrid)
+                                context.Order.Attach((Order)_editableItem);
+                            else if (_selectedGrid == ServicesGrid)
+                                context.Service.Attach((Service)_editableItem);
+                            else if (_selectedGrid == UsersGrid)
+                                context.User.Attach((User)_editableItem);
+                        }
+
+                        entity.State = EntityState.Modified;
                         context.SaveChanges();
                         LoadAdminData();
                         ResetEditMode();
@@ -1516,20 +1436,6 @@ namespace HospitalApp
             }
         }
 
-        private void SetGridEditMode(DataGrid grid, object item)
-        {
-            if (grid == AdminPatientsGrid)
-                IsPatientsGridReadOnly = false;
-            else if (grid == AdminOrdersGrid)
-                IsOrdersGridReadOnly = false;
-            else if (grid == ServicesGrid)
-                IsServicesGridReadOnly = false;
-            else if (grid == UsersGrid)
-                IsUsersGridReadOnly = false;
-
-            grid.BeginEdit();
-        }
-
         private void ResetEditMode()
         {
             IsPatientsGridReadOnly = true;
@@ -1538,6 +1444,92 @@ namespace HospitalApp
             IsUsersGridReadOnly = true;
             _editableItem = null;
             _selectedGrid = null;
+        }
+        private void AddButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedGrid == null)
+            {
+                MessageBox.Show("Выберите таблицу для добавления записи!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string entityType = GetEntityType(_selectedGrid);
+            if (entityType == null)
+            {
+                MessageBox.Show("Неизвестный тип таблицы!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            using (var context = new HospitalBaseEntities())
+            {
+                var editWindow = new EditWindow(null, entityType, context);
+                if (editWindow.ShowDialog() == true)
+                {
+                    LoadAdminData();
+                    MessageBox.Show("Запись успешно добавлена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+        }
+
+        private void EditButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_selectedGrid == null || _selectedGrid.SelectedItem == null)
+            {
+                MessageBox.Show("Выберите запись для редактирования!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string entityType = GetEntityType(_selectedGrid);
+            if (entityType == null)
+            {
+                MessageBox.Show("Неизвестный тип таблицы!", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            using (var context = new HospitalBaseEntities())
+            {
+                var item = _selectedGrid.SelectedItem;
+                var editWindow = new EditWindow(item, entityType, context);
+                if (editWindow.ShowDialog() == true)
+                {
+                    LoadAdminData();
+                    MessageBox.Show("Запись успешно обновлена!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+        }
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            _selectedGrid = sender as DataGrid;
+            _editableItem = _selectedGrid?.SelectedItem;
+        }
+
+        private string GetEntityType(DataGrid grid)
+        {
+            if (grid == AdminPatientsGrid)
+                return "Pacient";
+            if (grid == AdminOrdersGrid)
+                return "Order";
+            if (grid == ServicesGrid)
+                return "Service";
+            if (grid == UsersGrid)
+                return "User";
+            return null;
+        }
+
+        private void DataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Delete && sender is DataGrid grid && grid.SelectedItem != null && _currentRole == "Лаборант-Администратор")
+            {
+                // Устанавливаем выбранную таблицу
+                _selectedGrid = grid;
+
+                // Вызываем логику удаления
+                DeleteButton_Click(sender, e);
+
+                // Предотвращаем дальнейшую обработку события Delete
+                e.Handled = true;
+            }
         }
     }
 }

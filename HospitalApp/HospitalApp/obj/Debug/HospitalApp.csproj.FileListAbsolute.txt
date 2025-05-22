@@ -1,10 +1,12 @@
+D:\Practics\HospitalApp\HospitalApp\bin\Debug\arm64\libSkiaSharp.dll
+D:\Practics\HospitalApp\HospitalApp\bin\Debug\arm64\libSkiaSharp.so
+D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.kernel.xml
+D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.styledxmlparser.xml
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\libSkiaSharp.dylib
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\x86\libSkiaSharp.dll
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\x64\libSkiaSharp.dll
-D:\Practics\HospitalApp\HospitalApp\bin\Debug\arm64\libSkiaSharp.dll
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\x64\libSkiaSharp.so
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\arm\libSkiaSharp.so
-D:\Practics\HospitalApp\HospitalApp\bin\Debug\arm64\libSkiaSharp.so
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\musl-x64\libSkiaSharp.so
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\HospitalApp.exe.config
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\HospitalApp.exe
@@ -62,12 +64,10 @@ D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.bouncy-castle-connector.xml
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.commons.xml
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.forms.xml
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.io.xml
-D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.kernel.xml
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.layout.xml
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.pdfa.xml
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.pdfua.xml
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.sign.xml
-D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.styledxmlparser.xml
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\itext.svg.xml
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\itextsharp.xml
 D:\Practics\HospitalApp\HospitalApp\bin\Debug\Microsoft.Bcl.AsyncInterfaces.xml
@@ -99,6 +99,7 @@ D:\Practics\HospitalApp\HospitalApp\bin\Debug\zxing.presentation.xml
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp.csproj.AssemblyReference.cache
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\Pages\AuthorizePage.g.cs
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\Pages\MainPage.g.cs
+D:\Practics\HospitalApp\HospitalApp\obj\Debug\MainWindow.g.cs
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\Pages\ProfilePage.g.cs
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\App.g.cs
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp_Content.g.cs
@@ -107,6 +108,7 @@ D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp_MarkupCompile.cache
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp_MarkupCompile.lref
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\Pages\AuthorizePage.baml
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\Pages\MainPage.baml
+D:\Practics\HospitalApp\HospitalApp\obj\Debug\MainWindow.baml
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\Pages\ProfilePage.baml
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp.g.resources
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp.Properties.Resources.resources
@@ -115,6 +117,3 @@ D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp.csproj.CoreCompileInpu
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\Hospital.58D4885F.Up2Date
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp.exe
 D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp.pdb
-D:\Practics\HospitalApp\HospitalApp\obj\Debug\MainWindow.g.cs
-D:\Practics\HospitalApp\HospitalApp\obj\Debug\MainWindow.baml
-D:\Practics\HospitalApp\HospitalApp\obj\Debug\HospitalApp.exe.config

@@ -130,19 +130,19 @@
                                 <ColumnDefinition Width="20"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
-                            <DataGrid x:Name="PatientsGrid" Margin="0,0,5,0" Height="200" HorizontalAlignment="Stretch" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave" PreviewKeyDown="LabDataGrid_PreviewKeyDown">
+                            <DataGrid x:Name="PatientsGrid" Margin="0,0,5,0" Height="200" HorizontalAlignment="Stretch" PreviewKeyDown="LabDataGrid_PreviewKeyDown">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="ФИО" Binding="{Binding Full_Name}" Width="*"/>
                                     <DataGridTextColumn Header="Дата рождения" Binding="{Binding Birth_Date, StringFormat=dd.MM.yyyy}" Width="Auto"/>
                                     <DataGridTextColumn Header="Полис" Binding="{Binding Policy}" Width="Auto"/>
                                 </DataGrid.Columns>
                             </DataGrid>
-                            <DataGrid x:Name="OrdersGrid" Margin="5,0,0,0" Grid.Column="2" Height="200" HorizontalAlignment="Stretch" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave" PreviewKeyDown="LabDataGrid_PreviewKeyDown">
+                            <DataGrid x:Name="OrdersGrid" Margin="5,0,0,0" Grid.Column="2" Height="200" HorizontalAlignment="Stretch" PreviewKeyDown="LabDataGrid_PreviewKeyDown">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Штрих-код" Binding="{Binding BarCode}" Width="Auto"/>
                                     <DataGridTextColumn Header="Пациент" Binding="{Binding Pacient.Full_Name}" Width="*"/>
                                     <DataGridTextColumn Header="Услуга" Binding="{Binding Service.Title}" Width="*"/>
-                                    <DataGridTextColumn Header="Дата создания" Binding="{Binding Create_Date, StringFormat=dd.MM.yyyy HH:mm}" Width="Auto"/>
+                                    <DataGridTextColumn Header="Дата создания" Binding="{Binding Create_Date, StringFormat=dd.MM.yyyy}" Width="Auto"/>
                                     <DataGridTextColumn Header="Статус" Width="Auto">
                                         <DataGridTextColumn.Binding>
                                             <MultiBinding Converter="{StaticResource StatusToTextConverter}">
@@ -169,12 +169,12 @@
                             <DatePicker x:Name="AnalysisDatePicker" Width="120" Margin="0,0,10,0" SelectedDate="{Binding AnalysisDate}"/>
                             <Button x:Name="AnalyzeButton" Content="Обновить статус" Width="120" Click="AnalyzeButton_Click"/>
                         </StackPanel>
-                        <DataGrid x:Name="ServiceProvidedGrid" Grid.Row="1" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" SelectionChanged="ServiceProvidedGrid_SelectionChanged" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                        <DataGrid x:Name="ServiceProvidedGrid" Grid.Row="1" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" SelectionChanged="ServiceProvidedGrid_SelectionChanged">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Штрих-код" Binding="{Binding Order.BarCode}" Width="Auto"/>
                                 <DataGridTextColumn Header="Пациент" Binding="{Binding Order.Pacient.Full_Name}" Width="*"/>
                                 <DataGridTextColumn Header="Услуга" Binding="{Binding Service.Title}" Width="*"/>
-                                <DataGridTextColumn Header="Дата создания" Binding="{Binding Order.Create_Date, StringFormat=dd.MM.yyyy HH:mm}" Width="Auto"/>
+                                <DataGridTextColumn Header="Дата создания" Binding="{Binding Order.Create_Date, StringFormat=dd.MM.yyyy}" Width="Auto"/>
                                 <DataGridTextColumn Header="Статус" Width="Auto">
                                     <DataGridTextColumn.Binding>
                                         <MultiBinding Converter="{StaticResource StatusToTextConverter}">
@@ -198,9 +198,8 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <DataGrid x:Name="AdminPatientsGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,0,0,5" 
-                                  IsReadOnly="{Binding IsPatientsGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                                  IsReadOnly="{Binding IsPatientsGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="ID Пациента" Binding="{Binding Pacient_Id, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                 <DataGridTextColumn Header="ФИО" Binding="{Binding Full_Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
                                 <DataGridTextColumn Header="Дата рождения" Binding="{Binding Birth_Date, StringFormat=dd.MM.yyyy, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                 <DataGridTextColumn Header="Паспорт" Binding="{Binding Passport, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
@@ -214,37 +213,69 @@
                             </DataGrid.Columns>
                         </DataGrid>
                         <DataGrid x:Name="AdminOrdersGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,5" Grid.Row="1" 
-                                  IsReadOnly="{Binding IsOrdersGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                                  IsReadOnly="{Binding IsOrdersGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="ID Заказа" Binding="{Binding Order_Id, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                <DataGridTextColumn Header="Дата создания" Binding="{Binding Create_Date, StringFormat=dd.MM.yyyy HH:mm, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridTextColumn Header="Дата создания" Binding="{Binding Create_Date, StringFormat=dd.MM.yyyy, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                 <DataGridComboBoxColumn Header="Пациент" 
                                                         SelectedValueBinding="{Binding Pacient_Id, UpdateSourceTrigger=PropertyChanged}" 
                                                         DisplayMemberPath="Full_Name" SelectedValuePath="Pacient_Id" Width="*"/>
                                 <DataGridComboBoxColumn Header="Услуга" 
                                                         SelectedValueBinding="{Binding Service_Id, UpdateSourceTrigger=PropertyChanged}" 
                                                         DisplayMemberPath="Title" SelectedValuePath="Service_Id" Width="*"/>
-                                <DataGridComboBoxColumn Header="Статус" 
-                                                        SelectedValueBinding="{Binding Order_Status, UpdateSourceTrigger=PropertyChanged}" 
-                                                        ItemsSource="{Binding StatusOptions}" Width="Auto"/>
-                                <DataGridTextColumn Header="Время завершения" Binding="{Binding Complete_Time, StringFormat=dd.MM.yyyy HH:mm, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                <DataGridTextColumn Header="Штрих-код" Binding="{Binding BarCode, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridTemplateColumn Header="Статус" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding Converter="{StaticResource StatusToTextConverter}">
+                                                        <Binding Path="Order_Status"/>
+                                                        <Binding Path="Complete_Time"/>
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ComboBox SelectedValue="{Binding Order_Status, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource BooleanToStatusConverter}}"
+                                                      ItemsSource="{Binding DataContext.StatusOptions, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTemplateColumn Header="Время завершения" Width="Auto">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding Complete_Time, StringFormat=dd.MM.yyyy HH:mm}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <DatePicker SelectedDate="{Binding Complete_Time, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                         <DataGrid x:Name="ServicesGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,5" Grid.Row="2" 
-                                  IsReadOnly="{Binding IsServicesGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                                  IsReadOnly="{Binding IsServicesGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="ID Услуги" Binding="{Binding Service_Id, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                 <DataGridTextColumn Header="Название" Binding="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
-                                <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat=C2, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridTextColumn Header="Цена" Binding="{Binding Price, StringFormat={}{0:N2} ₽, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                 <DataGridTextColumn Header="Срок (дни)" Binding="{Binding Deadline, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
-                                <DataGridTextColumn Header="Допуск" Binding="{Binding Deviation, StringFormat=P2, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
+                                <DataGridTextColumn Header="Допуск (%)" Width="Auto">
+                                    <DataGridTextColumn.Binding>
+                                        <Binding Path="Deviation" UpdateSourceTrigger="PropertyChanged" StringFormat="P0">
+                                            <Binding.Converter>
+                                                <local:DeviationToPercentConverter/>
+                                            </Binding.Converter>
+                                        </Binding>
+                                    </DataGridTextColumn.Binding>
+                                </DataGridTextColumn>
                             </DataGrid.Columns>
                         </DataGrid>
                         <DataGrid x:Name="UsersGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,0" Grid.Row="3" 
-                                  IsReadOnly="{Binding IsUsersGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                                  IsReadOnly="{Binding IsUsersGridReadOnly}" CellEditEnding="DataGrid_CellEditEnding" SelectionChanged="DataGrid_SelectionChanged" PreviewKeyDown="DataGrid_PreviewKeyDown">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="ID Пользователя" Binding="{Binding User_Id, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                 <DataGridTextColumn Header="ФИО" Binding="{Binding Full_Name, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
                                 <DataGridTextColumn Header="Логин" Binding="{Binding Login, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
                                 <DataGridTextColumn Header="Пароль" Binding="{Binding Password, UpdateSourceTrigger=PropertyChanged}" Width="Auto"/>
@@ -273,14 +304,14 @@
                     </Grid.RowDefinitions>
                     <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                         <StackPanel>
-                            <DataGrid x:Name="InsuranceCompaniesGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,0,0,5" SelectionChanged="InsuranceCompaniesGrid_SelectionChanged" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                            <DataGrid x:Name="InsuranceCompaniesGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,0,0,5" SelectionChanged="InsuranceCompaniesGrid_SelectionChanged">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Название" Binding="{Binding Title}" Width="*"/>
                                     <DataGridTextColumn Header="Адрес" Binding="{Binding Address}" Width="*"/>
                                     <DataGridTextColumn Header="ИНН" Binding="{Binding TIN}" Width="Auto"/>
                                 </DataGrid.Columns>
                             </DataGrid>
-                            <DataGrid x:Name="BillsGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,5" SelectionChanged="BillsGrid_SelectionChanged" MouseEnter="DataGrid_MouseEnter" MouseLeave="DataGrid_MouseLeave">
+                            <DataGrid x:Name="BillsGrid" MaxHeight="200" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="0,5,0,5" SelectionChanged="BillsGrid_SelectionChanged">
                                 <DataGrid.Columns>
                                     <DataGridTextColumn Header="Компания" Binding="{Binding Insurance_Company.Title}" Width="*"/>
                                     <DataGridTextColumn Header="Сумма (₽)" Binding="{Binding Account, StringFormat={}{0:N2} ₽}" Width="Auto"/>
@@ -297,7 +328,7 @@
                 </Grid>
             </TabItem>
             <TabItem x:Name="ReportsTab" Header="Отчеты">
-                <ScrollViewer x:Name="ReportsTabScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ScrollViewer x:Name="ReportsTabScrollViewer" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Disabled">
                     <Grid Margin="10">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
@@ -334,7 +365,6 @@
                                 <DatePicker x:Name="EndDatePicker" Margin="5" SelectedDate="{Binding EndDate}"/>
                             </StackPanel>
                         </GroupBox>
-                        <Button x:Name="GenerateReportButton" Grid.Row="3" Content="Сформировать отчет" Width="150" HorizontalAlignment="Right" Margin="0,0,0,10" Click="GenerateReport_Click"/>
                     </Grid>
                 </ScrollViewer>
             </TabItem>
@@ -343,6 +373,7 @@
             <Button x:Name="AddButton" Content="Добавить" Width="100" Margin="0,0,10,0" Click="AddButton_Click" Visibility="{Binding IsAdminTabSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <Button x:Name="EditButton" Content="Изменить" Width="100" Margin="0,0,10,0" Click="EditButton_Click" Visibility="{Binding IsAdminTabSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             <Button x:Name="DeleteButton" Style="{StaticResource DeleteButton}" Content="Удалить" Width="100" Margin="0,0,10,0" Click="DeleteButton_Click" Visibility="{Binding IsAdminTabSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+            <Button x:Name="GenerateReportButton" Content="Сформировать отчет" Width="150" HorizontalAlignment="Right" Margin="0,0,0,10" Click="GenerateReport_Click" Visibility="{Binding IsReportsTabSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         </StackPanel>
     </Grid>
 </Page>

@@ -1,24 +1,25 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Data.Entity;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
 using System.Windows.Threading;
+using HospitalApp.Properties;
 
 namespace HospitalApp
 {
-    public partial class ProfilePage : Page
+    public partial class ProfilePage : Page, INotifyPropertyChanged
     {
         private int _userId;
-        private DateTime _startTime;
+        private DateTime _sessionStartTime;
         private DispatcherTimer _timer;
 
         public ProfilePage(int userId)
         {
             InitializeComponent();
             _userId = userId;
-            _startTime = DateTime.Now;
             DataContext = this;
             LoadUserData();
             SetupTimer();
@@ -28,8 +29,36 @@ namespace HospitalApp
         public string Role { get; set; }
         public DateTime? LastLogin { get; set; }
         public string Login { get; set; }
-        public string CurrentTime => DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss");
-        public string Uptime => (DateTime.Now - _startTime).ToString(@"hh\:mm\:ss");
+        public string UserProfileIcon { get; set; }
+
+        private string _currentTime;
+        public string CurrentTime
+        {
+            get => _currentTime;
+            set
+            {
+                _currentTime = value;
+                OnPropertyChanged(nameof(CurrentTime));
+            }
+        }
+
+        private string _uptime;
+        public string Uptime
+        {
+            get => _uptime;
+            set
+            {
+                _uptime = value;
+                OnPropertyChanged(nameof(Uptime));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
 
         private void LoadUserData()
         {
@@ -45,6 +74,55 @@ namespace HospitalApp
                     LastLogin = user.Last_Login_Date;
                     Login = user.Login;
                     PswrdBox.Text = user.Password;
+
+                    // Set user profile icon based on role
+                    switch (user.Role?.Name ?? "Default")
+                    {
+                        case "Лаборант":
+                            UserProfileIcon = "/Resources/laborant_2.png";
+                            break;
+                        case "Лаборант-Исследователь":
+                            UserProfileIcon = "/Resources/laborant_1.jpeg";
+                            break;
+                        case "Лаборант-Администратор":
+                            UserProfileIcon = "/Resources/Администратор.png";
+                            break;
+                        case "Бухгалтер":
+                            UserProfileIcon = "/Resources/Бухгалтер.jpeg";
+                            break;
+                        case "Admin":
+                            UserProfileIcon = "/Resources/AdminIcon.png";
+                            break;
+                        case "Doctor":
+                            UserProfileIcon = "/Resources/DoctorIcon.png";
+                            break;
+                        case "Patient":
+                            UserProfileIcon = "/Resources/PatientIcon.png";
+                            break;
+                        default:
+                            UserProfileIcon = "/Resources/DefaultIcon.png";
+                            break;
+                    }
+
+                    // Determine session start time: use the earlier of Last_Login_Date or LastLoginTime
+                    DateTime lastLoginTime = Settings.Default.LastLoginTime == DateTime.MinValue ? DateTime.Now : Settings.Default.LastLoginTime;
+                    DateTime? lastLoginDate = user.Last_Login_Date;
+                    if (lastLoginDate.HasValue && lastLoginDate.Value < lastLoginTime)
+                    {
+                        _sessionStartTime = lastLoginDate.Value;
+                    }
+                    else
+                    {
+                        _sessionStartTime = lastLoginTime;
+                    }
+
+                    // Update LastLoginTime only if it's uninitialized
+                    if (Settings.Default.LastLoginTime == DateTime.MinValue)
+                    {
+                        Settings.Default.LastLoginTime = _sessionStartTime;
+                    }
+                    Settings.Default.LastUserId = _userId;
+                    Settings.Default.Save();
                 }
                 else
                 {
@@ -62,8 +140,9 @@ namespace HospitalApp
             };
             _timer.Tick += (s, e) =>
             {
-                CurrentTimeText.Text = CurrentTime;
-                UptimeText.Text = Uptime;
+                CurrentTime = DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss");
+                TimeSpan sessionDuration = DateTime.Now - _sessionStartTime;
+                Uptime = sessionDuration.ToString(@"hh\:mm\:ss");
             };
             _timer.Start();
         }
@@ -93,12 +172,16 @@ namespace HospitalApp
 
         private void ExitButton_Click(object sender, RoutedEventArgs e)
         {
+            Settings.Default.LastUserId = _userId;
+            Settings.Default.Save();
             UserData.CurrentUserId = 0;
             NavigationService?.Navigate(new AuthorizePage());
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
+            Settings.Default.LastUserId = _userId;
+            Settings.Default.Save();
             NavigationService.GoBack();
         }
     }
